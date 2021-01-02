@@ -76,27 +76,27 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 %rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</i></p>
 
 <p>Nu volgen alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</p>
-<p>%gm_rdnaptrans2018</br>
+<p><i>%gm_rdnaptrans2018</br>
 %grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
 %grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
 %self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</br>
-%certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt, /folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt, RDNAP)</p>
+%certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt, /folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt, RDNAP)</i></p>
 
-<p>%self_validation_ETRS89_v1(RDNAP)      %* Very slow;</br>
+<p><i>%self_validation_ETRS89_v1(RDNAP)      %* Very slow;</br>
 %self_validation_RD_v1(RDNAP)  %* Very slow;</br>
 %rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</br>
 %self_validation_ETRS89_v2(RDNAP)</br>
 %self_validation_RD_v2(RDNAP)</br>
-%display_self_validation_results(RDNAP)</p>
+%display_self_validation_results(RDNAP)</i></p>
 
-<p>%WGS84_pseudo_validatation_v2(RDNAP)</p>
+<p><i>%WGS84_pseudo_validatation_v2(RDNAP)</i></p>
 
-<p>%certify_validation_ETRS89_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</br>
+<p><i>%certify_validation_ETRS89_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</br>
 %certify_validation_RD_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v1.txt)</br>
 %certify_validation_ETRS89_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v2.txt)</br>
-%certify_validation_RD_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</p>
+%certify_validation_RD_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</i></p>
 
-<p>%etrs_itrs_ini_v1()</br>
+<p><i>%etrs_itrs_ini_v1()</br>
 %WGS84_to_ETRS89_v1(52, 5, 43)</br>
 %etrs_itrs_output_v1</br>
 %ETRS89_to_WGS84_v1(51.999994778222, 4.9999922685, 42.98187019)</br>
@@ -107,15 +107,15 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 %etrs_itrs_output_v1</p>
 %WGS84_to_ETRS89_v1(51.999994787,4.999992597, -0.022)</br>
 %WGS84_to_ETRS89_v1(55.878,7.78, 45)</br>
-%etrs_itrs_output_v1</p>
+%etrs_itrs_output_v1</i></p>
 
-<p>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   
+<p><i>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   
 %* 30010021 - 66080.2628 - 531539.0239 - 73.2384;</br>
 %rdnaptrans2018_output_v1<br>
 %ETRS89_to_RD_v1(&quot;52 9 22.178&quot;,&quot;5 23 15.500&quot;,pH=72.6882,pType=dgr)</br>
 %rdnaptrans2018_output_v1</br>
 %ETRS89_to_RD_v1(51.728601274,4.712120126,pH=301.7981)   %* 108360.879   415757.2745  258.0057;</br>
-%rdnaptrans2018_output_v1</p>
+%rdnaptrans2018_output_v1</i></p>
 
 # Macro Overzicht
 
