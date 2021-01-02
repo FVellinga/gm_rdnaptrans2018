@@ -7,7 +7,7 @@
 <p>De SAS macro <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse <b>RD NAP</b> (<b>R</b>ijks<b>D</b>riehoeksmeting en <b>N</b>ormaal
 <b>A</b>msterdam <b>P</b>eil) coördinaten omzet, transformeert, naar <b>ETRS89</b> (<b>E</b>uropean <b>T</b>errestrial <b>R</b>eference
 <b>S</b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk <b>RDNAPTRANS™2018</b> voeren. Dit betekent dat deze
-transformaties correct zijn als er juist gebruik wordt gemaakt van gm_rdnaptrans2018.sas. <b>RD NAP</b> dimensie is in meters, <b>ETRS89</b> is in graden
+transformaties correct zijn als er juist gebruik wordt gemaakt van <b>gm_rdnaptrans2018.sas</b>. <b>RD NAP</b> dimensie is in meters, <b>ETRS89</b> is in graden
 en meters (de hoogte).</p>
 
 <p>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
@@ -109,8 +109,7 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 %WGS84_to_ETRS89_v1(55.878,7.78, 45)</br>
 %etrs_itrs_output_v1</i></p>
 
-<p><i>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   
-%* 30010021 - 66080.2628 - 531539.0239 - 73.2384;</br>
+<p><i>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   %* 30010021 - 66080.2628 - 531539.0239 - 73.2384;</br>
 %rdnaptrans2018_output_v1<br>
 %ETRS89_to_RD_v1(&quot;52 9 22.178&quot;,&quot;5 23 15.500&quot;,pH=72.6882,pType=dgr)</br>
 %rdnaptrans2018_output_v1</br>
@@ -119,7 +118,7 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 
 # Macro Overzicht
 
-<p>Overzicht van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </p>
+<p>Overzicht van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten.</p>
 
 <table>
  <tr>
