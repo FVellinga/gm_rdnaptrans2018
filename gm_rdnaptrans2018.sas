@@ -30,11 +30,11 @@ Example version 2:
   %ETRS89_to_RD_v2(DataSetIn, DataSetOut)
   
 Version:
-1.0 - 20191008: Fred Vellinga, Initial version. V1 version.
+1.0 - 20201008: Fred Vellinga, Initial version. V1 version.
                 (This version is certified.)
-1.1 - 20191019: Fred Vellinga, version 2 solution added.
+1.1 - 20201019: Fred Vellinga, version 2 solution added.
                 (This version is also certified.)
-1.2 - 20191027: Fred Vellinga, ETRS to ITRS transformation added. ITRF2008/ITRF2014 can regarded as equal to WGS84.
+1.2 - 20201027: Fred Vellinga, ETRS to ITRS transformation added. ITRF2008/ITRF2014 can regarded as equal to WGS84.
                 ITRF2008≈WGS84-G1762. Please note this has nothing to do with the RDNAPTRANS™2018 trademark.
                 That trademark only applies to the RD to ETRS89 (both ways) transformation.
 1.3 - 20210102: Fred Vellinga, Self-validation and certification functionality added. The user can verify if the code
