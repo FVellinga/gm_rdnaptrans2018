@@ -1,54 +1,6 @@
 # gm_rdnaptrans2018.sas
 
-<head>
-<style>
-<!--
- /* Font Definitions */
- @font-face
-	{font-family:Helvetica;
-	panose-1:2 11 6 4 2 2 2 2 2 4;}
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-@font-face
-	{font-family:Consolas;
-	panose-1:2 11 6 9 2 2 4 3 2 4;}
-@font-face
-	{font-family:"Book Antiqua";
-	panose-1:2 4 6 2 5 3 5 3 3 4;}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:8.0pt;
-	margin-left:0cm;
-	line-height:107%;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;}
-a:link, span.MsoHyperlink
-	{color:#0563C1;
-	text-decoration:underline;}
-p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
-	{margin:0cm;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;}
-.MsoChpDefault
-	{font-family:"Calibri",sans-serif;}
-.MsoPapDefault
-	{margin-bottom:8.0pt;
-	line-height:107%;}
-@page WordSection1
-	{size:595.3pt 841.9pt;
-	margin:70.85pt 70.85pt 70.85pt 70.85pt;}
-div.WordSection1
-	{page:WordSection1;}
--->
-</style>
 
-</head>
 
 <body lang=NL link="#0563C1" vlink="#954F72" style='word-wrap:break-word'>
 
