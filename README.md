@@ -116,11 +116,8 @@ handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te
 doen:</span></br>
 
 <span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</span></br>
-
-<span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v2</span></br>
-
-<span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018,
-RDNAP.NLGEO2018)</span></p>
+%rdnaptrans2018_ini_v2</br>
+%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</p>
 
 <p><span style='font-family:"Book Antiqua"'>Hier staan
 alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</span></p>
@@ -129,79 +126,38 @@ alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.
 %grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
 %grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
 %self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</br>
-%certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt, /folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt, RDNAP)</br>
+%certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt, /folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt, RDNAP)</p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>                             
-</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_ETRS89_v1(RDNAP)
-%* Very slow;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_RD_v1(RDNAP) 
-   %* Very slow;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v2</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018,
-RDNAP.NLGEO2018)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_ETRS89_v2(RDNAP)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_RD_v2(RDNAP)</span></p>
-
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%display_self_validation_results(RDNAP)</span></p>
-
+<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_ETRS89_v1(RDNAP)      %* Very slow;</br>
+%self_validation_RD_v1(RDNAP)  %* Very slow;</br>
+%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</br>
+%self_validation_ETRS89_v2(RDNAP)</br>
+%self_validation_RD_v2(RDNAP)</br>
+%display_self_validation_results(RDNAP)</p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_pseudo_validatation_v2(RDNAP)</span></p>
 
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_ETRS89_v1(RDNAP,
-/folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_RD_v1(RDNAP,
-/folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v1.txt)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_ETRS89_v2(RDNAP,
-/folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v2.txt)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_RD_v2(RDNAP,
-/folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</span></p>
+<p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_ETRS89_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</br>
+%certify_validation_RD_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v1.txt)</br>
+%certify_validation_ETRS89_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v2.txt)</br>
+%certify_validation_RD_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</p>
 
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1()</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(52,
-5, 43)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_WGS84_v1(51.999994778222,
-4.9999922685, 42.98187019)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(52,
-5, 0)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_WGS84_v1(51.999994801
-, 4.999992309, -0.018)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(51.999994787,
+<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1()<br>
+%WGS84_to_ETRS89_v1(52, 5, 43)</br>
+%etrs_itrs_output_v1</br>
+%ETRS89_to_WGS84_v1(51.999994778222,
+4.9999922685, 42.98187019)</br>
+%etrs_itrs_output_v1</br>
+%WGS84_to_ETRS89_v1(52, 5, 0)</span></p>
+%etrs_itrs_output_v1</span></p>
+%ETRS89_to_WGS84_v1(51.999994801, 4.999992309, -0.018)</span></p>
+%etrs_itrs_output_v1</span></p>
+%WGS84_to_ETRS89_v1(51.999994787,
 4.999992597, -0.022)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(55.878,
+%WGS84_to_ETRS89_v1(55.878,
 7.78, 45)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
+%etrs_itrs_output_v1</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(54.000005178272,
 7.000008038945, 12.02079392 )</span></p>
@@ -219,16 +175,7 @@ RDNAP.NLGEO2018)</span></p>
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(52,
 5, 43)</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs89itrs2014wgs84_output_v1;</span></p>
 
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_WGS84_v1(51.999994814,
-4.999992333, 42.9821)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(51.999994805,
-4.999992317, 42.982, -1)</span></p>
 
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v1(RDNAP)</span></p>
