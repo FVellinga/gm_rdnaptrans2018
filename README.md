@@ -125,22 +125,11 @@ RDNAP.NLGEO2018)</span></p>
 <p><span style='font-family:"Book Antiqua"'>Hier staan
 alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt,
-RDNAP)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt,
-RDNAP)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt,
-RDNAP)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt                   
-,/folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>                             
-,RDNAP)</span></p>
+<p><span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</br>
+%grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
+%grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
+%self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</br>
+%certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt, /folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt, RDNAP)</br>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>                             
 </span></p>
