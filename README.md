@@ -1,4 +1,5 @@
-
+# gm_rdnaptrans2018.sas
+# (global macro gm_rdnaptrans2018.sas)
 <p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>De
 Theorie</span></u></b></p>
 
@@ -143,74 +144,30 @@ alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.
 %certify_validation_RD_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</p>
 
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1()<br>
+<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1()</br>
 %WGS84_to_ETRS89_v1(52, 5, 43)</br>
 %etrs_itrs_output_v1</br>
-%ETRS89_to_WGS84_v1(51.999994778222,
-4.9999922685, 42.98187019)</br>
+%ETRS89_to_WGS84_v1(51.999994778222, 4.9999922685, 42.98187019)</br>
 %etrs_itrs_output_v1</br>
-%WGS84_to_ETRS89_v1(52, 5, 0)</span></p>
+%WGS84_to_ETRS89_v1(52, 5, 0)</br>
 %etrs_itrs_output_v1</span></p>
-%ETRS89_to_WGS84_v1(51.999994801, 4.999992309, -0.018)</span></p>
+%ETRS89_to_WGS84_v1(51.999994801, 4.999992309, -0.018)</br>
 %etrs_itrs_output_v1</span></p>
-%WGS84_to_ETRS89_v1(51.999994787,
-4.999992597, -0.022)</span></p>
-%WGS84_to_ETRS89_v1(55.878,
-7.78, 45)</span></p>
-%etrs_itrs_output_v1</span></p>
+%WGS84_to_ETRS89_v1(51.999994787,4.999992597, -0.022)</br>
+%WGS84_to_ETRS89_v1(55.878,7.78, 45)</br>
+%etrs_itrs_output_v1</p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(54.000005178272,
-7.000008038945, 12.02079392 )</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_WGS84_v1(54,
-7, 12)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1(pItrf=ITRF2014)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(52,
-5, 43)</span></p>
-
-
-
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v1(RDNAP)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_RD_v1(53.199392335,6.05939747)
-%* 199920.0426 - 579403.4233;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%RD_to_ETRS89_v1(199920.0426,579403.4233)
-%* 53.199392335 - 6.05939747;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   
-%* 30010021 - 66080.2628 - 531539.0239 - 73.2384;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_RD_v1(&quot;52
-9 22.178&quot;,&quot;5 23 15.500&quot;,pH=72.6882,pType=dgr)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_RD_v1(51.728601274,4.712120126,pH=301.7981)   
-%* 108360.879   415757.2745  258.0057;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_output_v1</span></p>
+%* 30010021 - 66080.2628 - 531539.0239 - 73.2384;</br>
+%rdnaptrans2018_output_v1<br>
+%ETRS89_to_RD_v1(&quot;52 9 22.178&quot;,&quot;5 23 15.500&quot;,pH=72.6882,pType=dgr)</br>
+%rdnaptrans2018_output_v1</br>
+%ETRS89_to_RD_v1(51.728601274,4.712120126,pH=301.7981)   %* 108360.879   415757.2745  258.0057;</br>
+%rdnaptrans2018_output_v1</p>
 
 <p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>Macro
 Overzicht</span></u></b></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'> </span></p>
 
 <p><span style='font-size:10.0pt;font-family:"Book Antiqua"'>Overzicht
 van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </span></p>
