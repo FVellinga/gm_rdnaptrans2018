@@ -1,161 +1,121 @@
 # gm_rdnaptrans2018.sas
-<p style='font-family:"Book Antiqua"'> lees als: global macro rdnaptran2018.sas</p>
+
+<p>Lees als: global macro rdnaptran2018.sas</p>
+
 # De Theorie
-<p><span style='font-family:"Book Antiqua"'>De SAS macro
-<b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse
-<b>RD NAP</b> (<b><u>R</u></b>ijks<b><u>D</u></b>riehoeksmeting en <b><u>N</u></b>ormaal
-<b><u>A</u></b>msterdam <b><u>P</u></b>eil) coördinaten omzet, transformeert,
-naar <b>ETRS89</b> (<b><u>E</u></b>uropean <b><u>T</u></b>errestrial <b><u>R</u></b>eference
-<b><u>S</u></b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk
-</span><b><span style='font-family:"Book Antiqua";color:#333333;
-background:white'>RDNAPTRANS™2018</span></span></b><span style='font-family:
-"Book Antiqua";color:#333333;background:white'> voeren. Dit betekent dat deze
-transformaties correct zijn als er juist gebruik wordt gemaakt van </span><b><span
-style='font-family:"Book Antiqua"'>gm_rdnaptrans2018.sas</span></b><span
-style='font-family:"Book Antiqua"'>.</span></br><span style='font-family:"Book Antiqua";
-color:#333333;background:white'>RD NAP</span></b><span style='font-family:"Book Antiqua";
-color:#333333;background:white'> dimensie is een meters, <b>ETRS89</b> is in graden
-en meters (de hoogte).</span></p>
 
-<p><span style='font-family:"Book Antiqua";color:#333333;
-background:white'>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
-<b>ITRS</b> (</span><b><u><span style='font-family:"Book Antiqua"'>I</span></u></b><span
-style='font-family:"Book Antiqua"'>nternational Terrestrial <b><u>R</u></b>eference
-<b><u>S</u></b>ystem) om <b>WGS84</b> (<b>W</b>orld <b>G</b>eodetic <b>S</b>ystem
-89) coördinaten te <i>benaderen</i>. <b>WGS89</b> </span><span
-style='font-family:"Book Antiqua";color:#333333;background:white'>dimensie
-</span><span style='font-family:"Book Antiqua"'>is in graden en meters (de
+<p>De SAS macro <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse
+<b>RD NAP</b> (<b>R</b>ijks<b>D</b>riehoeksmeting en <b>N</b>ormaal
+<b>A</b>msterdam <b>P</b>eil) coördinaten omzet, transformeert,
+naar <b>ETRS89</b> (<b>E</b>uropean <b>T</b>errestrial <b>R</b>eference
+<b>S</b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk
+RDNAPTRANS™2018 voeren. Dit betekent dat deze
+transformaties correct zijn als er juist gebruik wordt gemaakt van gm_rdnaptrans2018.sas. </br>RD NAP dimensie is in meters, <b>ETRS89</b> is in graden
+en meters (de hoogte).</p>
+
+<p>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
+ <b>ITRS</b> (<b>I</b>nternational <b>T</b>errestrial <b>R</b>eference
+<b>S</b>ystem) om <b>WGS84</b> (<b>W</b>orld <b>G</b>eodetic <b>S</b>ystem
+89) coördinaten te <i>benaderen</i>. <b>WGS89</b> dimensie is in graden en meters (de
 hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transformatie
-en is <b><i><u>niet</u></i></b> onderdeel van het handelsmerk </span><b><span
-style='font-family:"Book Antiqua";color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
-style='font-family:"Book Antiqua";color:#333333;background:white'>.</span></p>
+en is <b><i>niet</i></b> onderdeel van het handelsmerk RDNAPTRANS™2018.</p>
 
 
-<p><span style='font-family:"Book Antiqua"'>Los van alle details kan het volgende gezegd worden:</span>
-</br><span style='font-family:"Book Antiqua"'>Er is maar
-één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </span></br>
+<p>Los van alle details kan het volgende gezegd worden:
+</br>Er is maar één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </br>
 
-<span style='font-family:Consolas'>RD NAP</span><span
-style='font-size:8.0pt;font-family:Consolas'>(1)</span><span style='font-family:
-Consolas'> -&gt; ETRS89</span><span style='font-size:8.0pt;font-family:Consolas'>(2)</span><span
-style='font-family:Consolas'> -&gt; ITRF2008</span><span style='font-size:8.0pt;
-font-family:Consolas'>(3)</span><span style='font-family:Consolas'> -&gt; WGS84</span><span
-style='font-size:8.0pt;font-family:Consolas'>(4)</span></br>
-<span style='font-size:8.0pt;font-family:Consolas'>(ITFR2008
-is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</span></p>
-<p><span style='font-family:"Book Antiqua"'>Deze code gaat
-niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
-kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een
-vorm van schijnnauwkeurigheid creëren.</span></p>
+RD NAP(1) -&gt; ETRS89(2) -&gt; ITRF2008(3) -&gt; WGS84(4)</br>
+(ITFR2008 is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</p>
+<p>Deze code gaat niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
+kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een vorm van schijnnauwkeurigheid creëren.</p>
 
-<p><b><span style='font-family:"Book Antiqua";
-color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
-style='font-family:"Book Antiqua";color:#333333;background:white'> compliant
+<p><b>RDNAPTRANS™2018</b>
+ compliant
 code transformeert elk datum paar naar een ander datum paar, welke plek op
 aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt
 er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen
-Deze code geeft die waarschuwing (nog) niet.</span></p>
+Deze code geeft die waarschuwing (nog) niet.</p>
 
-<p><span style='font-family:"Book Antiqua"'>Tot zover de
-theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</span></p>
+<p>Tot zover de theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
 
 # De Code
 
-<p style='font-family:"Book Antiqua"'>De SAS
-code ondersteunt twee manieren, methoden om te transformeren:</p>
+<p>De SAS code ondersteunt twee manieren, methoden om te transformeren:</p>
 
 <table border=1 cellspacing=0 cellpadding=0
  style='border-collapse:collapse;border:none'>
  <tr>
-  <td width=39 valign=top style='width:28.95pt;border:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-family:Consolas'>V1</span></p>
+  <td>
+  <p>V1</p>
   </td>
-  <td width=557 valign=top style='width:417.9pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-family:Consolas'>Maakt geen gebruik van
-  data sets als input/input. De datasetless benadering. De input/output zijn macro
-  variabelen. Geschikt als je één coördinatenpaar wilt transformeren.</span></p>
+  <td>
+  <p>Maakt geen gebruik van data sets als input/input. De datasetless benadering. De input/output zijn macro
+  variabelen. Geschikt als je één coördinatenpaar wilt transformeren.</p>
   </td>
  </tr>
  <tr>
-  <td width=39 valign=top style='width:28.95pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-family:Consolas'>V2</span></p>
+  <td>
+  <p>V2</p>
   </td>
-  <td width=557 valign=top style='width:417.9pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-family:Consolas'>Maakt gebruik van data
-  sets als input/input. Geschikt voor bulk transformaties. Vrij rap volgens mij.</span></p>
+  <td>
+  <p>Maakt gebruik van data sets als input/input. Geschikt voor bulk transformaties. Vrij rap volgens mij.</p>
   </td>
  </tr>
 </table>
 
-<p><span style='font-family:"Book Antiqua"'>Tevens moeten
+<p>Tevens moeten
 er twee grid files (tekst bestanden) worden ingeladen en opgeslagen worden als
 dataset. Optioneel zijn het zogenaamde zelfvalidatie bestand en de twee certificatie
-validatie bestanden. Handig, want hiermee toon je aan dat deze code werkt.</span></p>
+validatie bestanden. Handig, want hiermee toon je aan dat deze code werkt.</p>
 
-<p><span style='font-family:"Book Antiqua"'>Dit, het
-laden van files en ze opslaan als dataset, zijn eenmalige acties. Sla ze op in
-een pre-assigned library, bij mij heet die </span><b><span style='font-family:
-Consolas'>RDNAP</span></b><span style='font-family:"Book Antiqua"'>, en klaar
-ben je. </span></p>
+<p>Dit, het laden van files en ze opslaan als dataset, zijn eenmalige acties. Sla ze op in
+een pre-assigned library, bij mij heet die <b>RDNAP</b>, en klaar ben je.</p>
 
-<p><span style='font-family:"Book Antiqua"'>Gebruik
-van de macro staat beschreven in de header. Het is geschreven binnen SAS studio.
+<p>Gebruik van de macro staat beschreven in de header. Het is geschreven binnen SAS studio.
 Ik sla macro’s op in een SAS autocall library. Dus als je <b>gm_rdnaptrans2018.sas</b>
-daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code werken.</span></p>
+daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code werken.</p>
 
-<p><span style='font-family:"Book Antiqua"'>Misschien
-handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te
-doen:</span></br>
-
-<span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</span></br>
+<p>Misschien handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te doen:</br>
+%gm_rdnaptrans2018</br>
 %rdnaptrans2018_ini_v2</br>
 %rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</p>
 
-<p><span style='font-family:"Book Antiqua"'>Hier staan
-alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</br>
+<p>Nu volgen alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</p>
+<p>%gm_rdnaptrans2018</br>
 %grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
 %grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
 %self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</br>
 %certificate_validation_import(/folders/myfolders/sasuser.v94/files/input/002_ETRS89.txt, /folders/myfolders/sasuser.v94/files/input/002_RDNAP.txt, RDNAP)</p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_ETRS89_v1(RDNAP)      %* Very slow;</br>
+<p>%self_validation_ETRS89_v1(RDNAP)      %* Very slow;</br>
 %self_validation_RD_v1(RDNAP)  %* Very slow;</br>
 %rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</br>
 %self_validation_ETRS89_v2(RDNAP)</br>
 %self_validation_RD_v2(RDNAP)</br>
 %display_self_validation_results(RDNAP)</p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_pseudo_validatation_v2(RDNAP)</span></p>
+<p>%WGS84_pseudo_validatation_v2(RDNAP)</p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_ETRS89_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</br>
+<p>%certify_validation_ETRS89_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</br>
 %certify_validation_RD_v1(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v1.txt)</br>
 %certify_validation_ETRS89_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v2.txt)</br>
 %certify_validation_RD_v2(RDNAP, /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</p>
 
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1()</br>
+<p>%etrs_itrs_ini_v1()</br>
 %WGS84_to_ETRS89_v1(52, 5, 43)</br>
 %etrs_itrs_output_v1</br>
 %ETRS89_to_WGS84_v1(51.999994778222, 4.9999922685, 42.98187019)</br>
 %etrs_itrs_output_v1</br>
 %WGS84_to_ETRS89_v1(52, 5, 0)</br>
-%etrs_itrs_output_v1</span></p>
+%etrs_itrs_output_v1</p>
 %ETRS89_to_WGS84_v1(51.999994801, 4.999992309, -0.018)</br>
-%etrs_itrs_output_v1</span></p>
+%etrs_itrs_output_v1</p>
 %WGS84_to_ETRS89_v1(51.999994787,4.999992597, -0.022)</br>
 %WGS84_to_ETRS89_v1(55.878,7.78, 45)</br>
 %etrs_itrs_output_v1</p>
 
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   
+<p>%ETRS89_to_RD_v1(52.763874938,4.069800843,pH=115.9049)   
 %* 30010021 - 66080.2628 - 531539.0239 - 73.2384;</br>
 %rdnaptrans2018_output_v1<br>
 %ETRS89_to_RD_v1(&quot;52 9 22.178&quot;,&quot;5 23 15.500&quot;,pH=72.6882,pType=dgr)</br>
@@ -163,731 +123,482 @@ alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.
 %ETRS89_to_RD_v1(51.728601274,4.712120126,pH=301.7981)   %* 108360.879   415757.2745  258.0057;</br>
 %rdnaptrans2018_output_v1</p>
 
-<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>Macro
-Overzicht</span></u></b></p>
+# Macro Overzicht
 
-<p><span style='font-size:10.0pt;font-family:"Book Antiqua"'>Overzicht
-van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </span></p>
+<p>Overzicht van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </p>
 
-
-<table border=1 cellspacing=0 cellpadding=0 width=587
- style='width:440.4pt;border-collapse:collapse;border:none'>
+<table>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><b><span style='font-size:12.0pt;font-family:Consolas'>#</span></b></p>
+  <td>
+  <p><b>#</b></p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><b><span style='font-size:12.0pt;font-family:Consolas'>Linenumber</span></b></p>
+  <td>
+  <p><b>Linenumber</b></p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><b><span style='font-size:12.0pt;font-family:Consolas'>Macro</span></b></p>
+  <td>
+  <p><b>Macro</b></p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1</span></p>
+  <td>
+  <p>1</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>240</span></p>
+  <td>
+  <p>240</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>gm_rdnaptrans2018</span></p>
+  <td >
+  <p>gm_rdnaptrans2018</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2</span></p>
+  <td>
+  <p>2</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>248</span></p>
+  <td>
+  <p>248</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>rdnaptrans2018_ini_v1(pLib)</span></p>
+  <td >
+  <p>rdnaptrans2018_ini_v1(pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3</span></p>
+  <td>
+  <p>3</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>422</span></p>
+  <td>
+  <p>422</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>rdnaptrans2018_output_v1</span></p>
+  <td >
+  <p>rdnaptrans2018_output_v1</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>4</span></p>
+  <td>
+  <p>4</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>452</span></p>
+  <td>
+  <p>452</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>conv_dgr_to_dec(pLat,
-  pLon)</span></p>
+  <td >
+  <p>conv_dgr_to_dec(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>5</span></p>
+  <td>
+  <p>5</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>476</span></p>
+  <td>
+  <p>476</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>conv_dec_to_rad(pLat,
-  pLon)</span></p>
+  <td >
+  <p>conv_dec_to_rad(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>6</span></p>
+  <td>
+  <p>6</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>499</span></p>
+  <td>
+  <p>499</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>conv_dgr_dec_rad(pD)</span></p>
+  <td >
+  <p>conv_dgr_dec_rad(pD)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>7</span></p>
+  <td>
+  <p>7</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>520</span></p>
+  <td>
+  <p>520</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>RD_datum_transformation(pLat,
-  pLon)</span></p>
+  <td >
+  <p>RD_datum_transformation(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>8</span></p>
+  <td>
+  <p>8</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>656</span></p>
+  <td>
+  <p>656</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>RD_correction(pLat,
-  pLon)</span></p>
+  <td >
+  <p>RD_correction(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>9</span></p>
+  <td>
+  <p>9</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>801</span></p>
+  <td>
+  <p>801</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>RD_map_projection(pLat,
-  pLon)</span></p>
+  <td >
+  <p>RD_map_projection(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>10</span></p>
+  <td>
+  <p>10</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>906</span></p>
+  <td>
+  <p>906</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>height_transformation(pLat,
-  pLon, pH, pType)</span></p>
+  <td >
+  <p>height_transformation(pLat, pLon, pH, pType)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>11</span></p>
+  <td>
+  <p>11</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>990</span></p>
+  <td>
+  <p>990</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>inverse_map_projection(pX,
-  pY)</span></p>
+  <td >
+  <p>inverse_map_projection(pX, pY)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>12</span></p>
+  <td>
+  <p>12</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1108</span></p>
+  <td>
+  <p>1108</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>inverse_correction(pLat,
-  pLon)</span></p>
+  <td >
+  <p>inverse_correction(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>13</span></p>
+  <td>
+  <p>13</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1186</span></p>
+  <td>
+  <p>1186</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>inverse_datum_transformation(pLat,
-  pLon)</span></p>
+  <td >
+  <p>inverse_datum_transformation(pLat, pLon)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>14</span></p>
+  <td>
+  <p>14</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1320</span></p>
+  <td>
+  <p>1320</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>ETRS89_to_RD_v1(pLat,
-  pLon, pH=-999999, pType=dec)</span></p>
+  <td >
+  <p>ETRS89_to_RD_v1(pLat, pLon, pH=-999999, pType=dec)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>15</span></p>
+  <td>
+  <p>15</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1375</span></p>
+  <td>
+  <p>1375</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>RD_to_ETRS89_v1(pX,
-  pY, pH=-999999)</span></p>
+  <td >
+  <p>RD_to_ETRS89_v1(pX, pY, pH=-999999)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>16</span></p>
+  <td>
+  <p>16</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1415</span></p>
+  <td>
+  <p>1415</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>rdnaptrans2018_ini_v2</span></p>
+  <td >
+  <p>rdnaptrans2018_ini_v2</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>17</span></p>
+  <td>
+  <p>17</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1551</span></p>
+  <td>
+  <p>1551</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>rdnaptrans2018_grid_v2(pRDgrid,
-  pHgrid)</span></p>
+  <td >
+  <p>rdnaptrans2018_grid_v2(pRDgrid, pHgrid)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>18</span></p>
+  <td>
+  <p>18</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1587</span></p>
+  <td>
+  <p>1587</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>ETRS89_to_RD_v2(pDSin,
-  pDSout)</span></p>
+  <td >
+  <p>ETRS89_to_RD_v2(pDSin, pDSout)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>19</span></p>
+  <td>
+  <p>19</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>1894</span></p>
+  <td>
+  <p>1894</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>RD_to_ETRS89_v2(pDSin,
-  pDSout)</span></p>
+  <td >
+  <p>RD_to_ETRS89_v2(pDSin, pDSout)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>20</span></p>
+  <td>
+  <p>20</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2178</span></p>
+  <td>
+  <p>2178</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>grid_import_rdcorr2018(pFile,
-  pLib)</span></p>
+  <td >
+  <p>grid_import_rdcorr2018(pFile, pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>21</span></p>
+  <td>
+  <p>21</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2198</span></p>
+  <td>
+  <p>2198</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>grid_import_nlgeo2018(pFile,
-  pLib)</span></p>
+  <td >
+  <p>grid_import_nlgeo2018(pFile, pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>22</span></p>
+  <td>
+  <p>22</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2218</span></p>
+  <td>
+  <p>2218</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>self_validation_import(pFile,
-  pLib)</span></p>
+  <td >
+  <p>self_validation_import(pFile, pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>23</span></p>
+  <td>
+  <p>23</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2243</span></p>
+  <td>
+  <p>2243</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>certificate_validation_import(pETRS89file,
-  pRDfile, pLib)</span></p>
+  <td >
+  <p>certificate_validation_import(pETRS89file, pRDfile, pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>24</span></p>
+  <td>
+  <p>24</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2285</span></p>
+  <td>
+  <p>2285</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>self_validation_ETRS89_v1(pLib)</span></p>
+  <td >
+  <p>self_validation_ETRS89_v1(pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>25</span></p>
+  <td>
+  <p>25</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2366</span></p>
+  <td>
+  <p>2366</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>self_validation_RD_v1(pLib)</span></p>
+  <td >
+  <p>self_validation_RD_v1(pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>26</span></p>
+  <td>
+  <p>26</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2450</span></p>
+  <td>
+  <p>2450</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>self_validation_ETRS89_v2(pLib)</span></p>
+  <td >
+  <p>self_validation_ETRS89_v2(pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>27</span></p>
+  <td>
+  <p>27</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2497</span></p>
+  <td>
+  <p>2497</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>self_validation_RD_v2(pLib)</span></p>
+  <td >
+  <p>self_validation_RD_v2(pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>28</span></p>
+  <td>
+  <p>28</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2555</span></p>
+  <td>
+  <p>2555</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>certify_validation_ETRS89_v1(pLib,
-  pOutputFile)</span></p>
+  <td >
+  <p>certify_validation_ETRS89_v1(pLib, pOutputFile)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>29</span></p>
+  <td>
+  <p>29</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2621</span></p>
+  <td>
+  <p>2621</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>certify_validation_RD_v1(pLib,
-  pOutputFile</span></p>
+  <td >
+  <p>certify_validation_RD_v1(pLib, pOutputFile</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>30</span></p>
+  <td>
+  <p>30</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2687</span></p>
+  <td>
+  <p>2687</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>certify_validation_ETRS89_v2(pLib,
-  pOutputFile)</span></p>
+  <td >
+  <p>certify_validation_ETRS89_v2(pLib, pOutputFile)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>31</span></p>
+  <td>
+  <p>31</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2719</span></p>
+  <td>
+  <p>2719</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>certify_validation_RD_v2(pLib,
-  pOutputFile)</span></p>
+  <td >
+  <p>certify_validation_RD_v2(pLib, pOutputFile)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>32</span></p>
+  <td>
+  <p>32</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2756</span></p>
+  <td>
+  <p>2756</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>etrs_itrs_ini_v1(pItrf=ITRF2014)</span></p>
+  <td >
+  <p>etrs_itrs_ini_v1(pItrf=ITRF2014)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>33</span></p>
+  <td>
+  <p>33</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2889</span></p>
+  <td>
+  <p>2889</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>etrs_itrs_output_v1</span></p>
+  <td >
+  <p>etrs_itrs_output_v1</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>34</span></p>
+  <td>
+  <p>34</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2905</span></p>
+  <td>
+  <p>2905</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>WGS84_to_ETRS89_v1(pLat,
-  pLon, pHeight)</span></p>
+  <td >
+  <p>WGS84_to_ETRS89_v1(pLat, pLon, pHeight)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>35</span></p>
+  <td>
+  <p>35</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2911</span></p>
+  <td>
+  <p>2911</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>ETRS89_to_WGS84_v1(pLat,
-  pLon, pHeight)</span></p>
+  <td >
+  <p>ETRS89_to_WGS84_v1(pLat, pLon, pHeight)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>36</span></p>
+  <td>
+  <p>36</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>2917</span></p>
+  <td>
+  <p>2917</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>lm_WGS84_to_ETRS89_v1(pLat,
-  pLon, pHeight, pDirection)</span></p>
+  <td >
+  <p>lm_WGS84_to_ETRS89_v1(pLat, pLon, pHeight, pDirection)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>37</span></p>
+  <td>
+  <p>37</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3090</span></p>
+  <td>
+  <p>3090</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>etrs_itrs_ini_v2(pItrf=ITRF2014)</span></p>
+  <td >
+  <p>etrs_itrs_ini_v2(pItrf=ITRF2014)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>38</span></p>
+  <td>
+  <p>38</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3204</span></p>
+  <td>
+  <p>3204</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>WGS84_to_ETRS89_v2(pDSin
-  ,pDSout)</span></p>
+  <td >
+  <p>WGS84_to_ETRS89_v2(pDSin, pDSout)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>39</span></p>
+  <td>
+  <p>39</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3209</span></p>
+  <td>
+  <p>3209</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>ETRS89_to_WGS84_v2(pDSin,
-  pDSout)</span></p>
+  <td >
+  <p>ETRS89_to_WGS84_v2(pDSin, pDSout)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>40</span></p>
+  <td>
+  <p>40</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3214</span></p>
+  <td>
+  <p>3214</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>lm_WGS84_to_ETRS89_v2(pDSin,pDSout,
-  pDirection)</span></p>
+  <td >
+  <p>lm_WGS84_to_ETRS89_v2(pDSin, pDSout, pDirection)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>41</span></p>
+  <td>
+  <p>41</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3374</span></p>
+  <td>
+  <p>3374</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>WGS84_pseudo_validatation_v2(pLib)</span></p>
+  <td >
+  <p>WGS84_pseudo_validatation_v2(pLib)</p>
   </td>
  </tr>
  <tr>
-  <td width=36 valign=top style='width:27.3pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>42</span></p>
+  <td>
+  <p>42</p>
   </td>
-  <td width=111 valign=top style='width:83.4pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>3477</span></p>
+  <td>
+  <p>3477</p>
   </td>
-  <td width=440 valign=top style='width:329.7pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0cm 5.4pt 0cm 5.4pt'>
-  <p><span style='font-size:10.0pt;font-family:Consolas'>display_self_validation_results(pLib)</span></p>
+  <td >
+  <p>display_self_validation_results(pLib)</p>
   </td>
  </tr>
 </table>
-
-
-
-
