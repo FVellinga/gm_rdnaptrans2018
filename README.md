@@ -4,13 +4,10 @@
 
 # De Theorie
 
-<p>De SAS macro <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse
-<b>RD NAP</b> (<b>R</b>ijks<b>D</b>riehoeksmeting en <b>N</b>ormaal
-<b>A</b>msterdam <b>P</b>eil) coördinaten omzet, transformeert,
-naar <b>ETRS89</b> (<b>E</b>uropean <b>T</b>errestrial <b>R</b>eference
-<b>S</b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk
-RDNAPTRANS™2018 voeren. Dit betekent dat deze
-transformaties correct zijn als er juist gebruik wordt gemaakt van gm_rdnaptrans2018.sas. </br>RD NAP dimensie is in meters, <b>ETRS89</b> is in graden
+<p>De SAS macro <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse <b>RD NAP</b> (<b>R</b>ijks<b>D</b>riehoeksmeting en <b>N</b>ormaal
+<b>A</b>msterdam <b>P</b>eil) coördinaten omzet, transformeert, naar <b>ETRS89</b> (<b>E</b>uropean <b>T</b>errestrial <b>R</b>eference
+<b>S</b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk <b>RDNAPTRANS™2018</b> voeren. Dit betekent dat deze
+transformaties correct zijn als er juist gebruik wordt gemaakt van gm_rdnaptrans2018.sas. <b>RD NAP</b> dimensie is in meters, <b>ETRS89</b> is in graden
 en meters (de hoogte).</p>
 
 <p>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
@@ -18,7 +15,7 @@ en meters (de hoogte).</p>
 <b>S</b>ystem) om <b>WGS84</b> (<b>W</b>orld <b>G</b>eodetic <b>S</b>ystem
 89) coördinaten te <i>benaderen</i>. <b>WGS89</b> dimensie is in graden en meters (de
 hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transformatie
-en is <b><i>niet</i></b> onderdeel van het handelsmerk RDNAPTRANS™2018.</p>
+en is <b><i>niet</i></b> onderdeel van het handelsmerk <b>RDNAPTRANS™2018</b>.</p>
 
 
 <p>Los van alle details kan het volgende gezegd worden:
@@ -29,13 +26,9 @@ RD NAP(1) -&gt; ETRS89(2) -&gt; ITRF2008(3) -&gt; WGS84(4)</br>
 <p>Deze code gaat niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
 kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een vorm van schijnnauwkeurigheid creëren.</p>
 
-<p><b>RDNAPTRANS™2018</b>
- compliant
-code transformeert elk datum paar naar een ander datum paar, welke plek op
-aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt
-er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
-dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen
-Deze code geeft die waarschuwing (nog) niet.</p>
+<p><b>RDNAPTRANS™2018</b> compliant code transformeert elk datum paar naar een ander datum paar, welke plek op
+aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
+dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen Deze code geeft die waarschuwing (nog) niet.</p>
 
 <p>Tot zover de theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
 
@@ -77,9 +70,10 @@ Ik sla macro’s op in een SAS autocall library. Dus als je <b>gm_rdnaptrans2018
 daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code werken.</p>
 
 <p>Misschien handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te doen:</br>
+<i>
 %gm_rdnaptrans2018</br>
 %rdnaptrans2018_ini_v2</br>
-%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</p>
+%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</i></p>
 
 <p>Nu volgen alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</p>
 <p>%gm_rdnaptrans2018</br>
