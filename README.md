@@ -1,8 +1,6 @@
 # gm_rdnaptrans2018.sas
-# (global macro gm_rdnaptrans2018.sas)
-<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>De
-Theorie</span></u></b></p>
-
+<p style='font-family:"Book Antiqua"'> lees als: global macro rdnaptran2018.sas</p>
+# De Theorie
 <p><span style='font-family:"Book Antiqua"'>De SAS macro
 <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse
 <b>RD NAP</b> (<b><u>R</u></b>ijks<b><u>D</u></b>riehoeksmeting en <b><u>N</u></b>ormaal
@@ -62,11 +60,10 @@ Deze code geeft die waarschuwing (nog) niet.</span></p>
 <p><span style='font-family:"Book Antiqua"'>Tot zover de
 theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</span></p>
 
-<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>De
-Code</span></u></b></p>
+# De Code
 
-<p><span style='font-family:"Book Antiqua"'>De SAS
-code ondersteunt twee manieren, methoden om te transformeren:</span></p>
+<p style='font-family:"Book Antiqua"'>De SAS
+code ondersteunt twee manieren, methoden om te transformeren:</p>
 
 <table border=1 cellspacing=0 cellpadding=0
  style='border-collapse:collapse;border:none'>
