@@ -1,49 +1,45 @@
 
-<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua",serif'>De
+<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>De
 Theorie</span></u></b></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
-
-<p><span style='font-family:"Book Antiqua",serif'>De SAS macro
+<p><span style='font-family:"Book Antiqua"'>De SAS macro
 <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse
 <b>RD NAP</b> (<b><u>R</u></b>ijks<b><u>D</u></b>riehoeksmeting en <b><u>N</u></b>ormaal
 <b><u>A</u></b>msterdam <b><u>P</u></b>eil) coördinaten omzet, transformeert,
 naar <b>ETRS89</b> (<b><u>E</u></b>uropean <b><u>T</u></b>errestrial <b><u>R</u></b>eference
 <b><u>S</u></b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk
-</span><b><span style='font-family:"Book Antiqua",serif;color:#333333;
+</span><b><span style='font-family:"Book Antiqua";color:#333333;
 background:white'>RDNAPTRANS™2018</span></span></b><span style='font-family:
-"Book Antiqua",serif;color:#333333;background:white'> voeren. Dit betekent dat deze
+"Book Antiqua";color:#333333;background:white'> voeren. Dit betekent dat deze
 transformaties correct zijn als er juist gebruik wordt gemaakt van </span><b><span
-style='font-family:"Book Antiqua",serif'>gm_rdnaptrans2018.sas</span></b><span
-style='font-family:"Book Antiqua",serif'>.</span></p>
-
-<p><b><span style='font-family:"Book Antiqua",serif;
-color:#333333;background:white'>RD NAP</span></b><span style='font-family:"Book Antiqua",serif;
+style='font-family:"Book Antiqua"'>gm_rdnaptrans2018.sas</span></b><span
+style='font-family:"Book Antiqua"'>.</span></br><span style='font-family:"Book Antiqua";
+color:#333333;background:white'>RD NAP</span></b><span style='font-family:"Book Antiqua";
 color:#333333;background:white'> dimensie is een meters, <b>ETRS89</b> is in graden
 en meters (de hoogte).</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif;color:#333333;
+<p><span style='font-family:"Book Antiqua";color:#333333;
 background:white'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif;color:#333333;
+<p><span style='font-family:"Book Antiqua";color:#333333;
 background:white'>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
-<b>ITRS</b> (</span><b><u><span style='font-family:"Book Antiqua",serif'>I</span></u></b><span
-style='font-family:"Book Antiqua",serif'>nternational Terrestrial <b><u>R</u></b>eference
+<b>ITRS</b> (</span><b><u><span style='font-family:"Book Antiqua"'>I</span></u></b><span
+style='font-family:"Book Antiqua"'>nternational Terrestrial <b><u>R</u></b>eference
 <b><u>S</u></b>ystem) om <b>WGS84</b> (<b>W</b>orld <b>G</b>eodetic <b>S</b>ystem
 89) coördinaten te <i>benaderen</i>. <b>WGS89</b> </span><span
-style='font-family:"Book Antiqua",serif;color:#333333;background:white'>dimensie
-</span><span style='font-family:"Book Antiqua",serif'>is in graden en meters (de
+style='font-family:"Book Antiqua";color:#333333;background:white'>dimensie
+</span><span style='font-family:"Book Antiqua"'>is in graden en meters (de
 hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transformatie
 en is <b><i><u>niet</u></i></b> onderdeel van het handelsmerk </span><b><span
-style='font-family:"Book Antiqua",serif;color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
-style='font-family:"Book Antiqua",serif;color:#333333;background:white'>.</span></p>
+style='font-family:"Book Antiqua";color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
+style='font-family:"Book Antiqua";color:#333333;background:white'>.</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Los van
+<p><span style='font-family:"Book Antiqua"'>Los van
 alle details kan het volgende gezegd worden:</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Er is maar
+<p><span style='font-family:"Book Antiqua"'>Er is maar
 één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </span></p>
 
 <p><span style='font-family:Consolas'>RD NAP</span><span
@@ -56,37 +52,37 @@ style='font-size:8.0pt;font-family:Consolas'>(4)</span></p>
 <p><span style='font-size:8.0pt;font-family:Consolas'>(ITFR2008
 is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Deze code gaat
+<p><span style='font-family:"Book Antiqua"'>Deze code gaat
 niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
 kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een
 vorm van schijnnauwkeurigheid creëren.</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><b><span style='font-family:"Book Antiqua",serif;
+<p><b><span style='font-family:"Book Antiqua";
 color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
-style='font-family:"Book Antiqua",serif;color:#333333;background:white'> compliant
+style='font-family:"Book Antiqua";color:#333333;background:white'> compliant
 code transformeert elk datum paar naar een ander datum paar, welke plek op
 aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt
 er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen
 Deze code geeft die waarschuwing (nog) niet.</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Tot zover de
+<p><span style='font-family:"Book Antiqua"'>Tot zover de
 theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua",serif'>De
+<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>De
 Code</span></u></b></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>De SAS
+<p><span style='font-family:"Book Antiqua"'>De SAS
 code ondersteunt twee manieren, methoden om te transformeren:</span></p>
 
 <table border=1 cellspacing=0 cellpadding=0
@@ -117,29 +113,29 @@ code ondersteunt twee manieren, methoden om te transformeren:</span></p>
  </tr>
 </table>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Tevens moeten
+<p><span style='font-family:"Book Antiqua"'>Tevens moeten
 er twee grid files (tekst bestanden) worden ingeladen en opgeslagen worden als
 dataset. Optioneel zijn het zogenaamde zelfvalidatie bestand en de twee certificatie
 validatie bestanden. Handig, want hiermee toon je aan dat deze code werkt.</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Dit, het
+<p><span style='font-family:"Book Antiqua"'>Dit, het
 laden van files en ze opslaan als dataset, zijn eenmalige acties. Sla ze op in
 een pre-assigned library, bij mij heet die </span><b><span style='font-family:
-Consolas'>RDNAP</span></b><span style='font-family:"Book Antiqua",serif'>, en klaar
+Consolas'>RDNAP</span></b><span style='font-family:"Book Antiqua"'>, en klaar
 ben je. </span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Gebruik
+<p><span style='font-family:"Book Antiqua"'>Gebruik
 van de macro staat beschreven in de header. Het is geschreven binnen SAS studio.
 Ik sla macro’s op in een SAS autocall library. Dus als je <b>gm_rdnaptrans2018.sas</b>
 daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code werken.</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>&nbsp;</span></p>
+<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Misschien
+<p><span style='font-family:"Book Antiqua"'>Misschien
 handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te
 doen:</span></p>
 
@@ -154,7 +150,7 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua",serif'>Hier staan
+<p><span style='font-family:"Book Antiqua"'>Hier staan
 alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</span></p>
 
 <p><span style='font-size:5.0pt;font-family:Consolas'>&nbsp;</span></p>
@@ -322,12 +318,12 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
-<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua",serif'>Macro
+<p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>Macro
 Overzicht</span></u></b></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'> </span></p>
 
-<p><span style='font-size:10.0pt;font-family:"Book Antiqua",serif'>Overzicht
+<p><span style='font-size:10.0pt;font-family:"Book Antiqua"'>Overzicht
 van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
