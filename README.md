@@ -1,10 +1,6 @@
 # gm_rdnaptrans2018.sas
 
-<html>
-
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
  /* Font Definitions */
@@ -1115,4 +1111,3 @@ van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </span></p>
 
 </body>
 
-</html>
