@@ -19,9 +19,6 @@ color:#333333;background:white'> dimensie is een meters, <b>ETRS89</b> is in gra
 en meters (de hoogte).</span></p>
 
 <p><span style='font-family:"Book Antiqua";color:#333333;
-background:white'>&nbsp;</span></p>
-
-<p><span style='font-family:"Book Antiqua";color:#333333;
 background:white'>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
 <b>ITRS</b> (</span><b><u><span style='font-family:"Book Antiqua"'>I</span></u></b><span
 style='font-family:"Book Antiqua"'>nternational Terrestrial <b><u>R</u></b>eference
@@ -34,32 +31,23 @@ en is <b><i><u>niet</u></i></b> onderdeel van het handelsmerk </span><b><span
 style='font-family:"Book Antiqua";color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
 style='font-family:"Book Antiqua";color:#333333;background:white'>.</span></p>
 
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
-<p><span style='font-family:"Book Antiqua"'>Los van
-alle details kan het volgende gezegd worden:</span></p>
+<p><span style='font-family:"Book Antiqua"'>Los van alle details kan het volgende gezegd worden:</span>
+</br><span style='font-family:"Book Antiqua"'>Er is maar
+één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </span></br>
 
-<p><span style='font-family:"Book Antiqua"'>Er is maar
-één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </span></p>
-
-<p><span style='font-family:Consolas'>RD NAP</span><span
+<span style='font-family:Consolas'>RD NAP</span><span
 style='font-size:8.0pt;font-family:Consolas'>(1)</span><span style='font-family:
 Consolas'> -&gt; ETRS89</span><span style='font-size:8.0pt;font-family:Consolas'>(2)</span><span
 style='font-family:Consolas'> -&gt; ITRF2008</span><span style='font-size:8.0pt;
 font-family:Consolas'>(3)</span><span style='font-family:Consolas'> -&gt; WGS84</span><span
-style='font-size:8.0pt;font-family:Consolas'>(4)</span></p>
-
-<p><span style='font-size:8.0pt;font-family:Consolas'>(ITFR2008
+style='font-size:8.0pt;font-family:Consolas'>(4)</span></br>
+<span style='font-size:8.0pt;font-family:Consolas'>(ITFR2008
 is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</span></p>
-
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
-
 <p><span style='font-family:"Book Antiqua"'>Deze code gaat
 niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
 kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een
 vorm van schijnnauwkeurigheid creëren.</span></p>
-
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
 <p><b><span style='font-family:"Book Antiqua";
 color:#333333;background:white'>RDNAPTRANS™2018</span></span></b><span
@@ -70,17 +58,11 @@ er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen
 Deze code geeft die waarschuwing (nog) niet.</span></p>
 
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
-
 <p><span style='font-family:"Book Antiqua"'>Tot zover de
 theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</span></p>
 
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
-
 <p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>De
 Code</span></u></b></p>
-
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
 
 <p><span style='font-family:"Book Antiqua"'>De SAS
 code ondersteunt twee manieren, methoden om te transformeren:</span></p>
@@ -113,8 +95,6 @@ code ondersteunt twee manieren, methoden om te transformeren:</span></p>
  </tr>
 </table>
 
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
-
 <p><span style='font-family:"Book Antiqua"'>Tevens moeten
 er twee grid files (tekst bestanden) worden ingeladen en opgeslagen worden als
 dataset. Optioneel zijn het zogenaamde zelfvalidatie bestand en de twee certificatie
@@ -126,34 +106,24 @@ een pre-assigned library, bij mij heet die </span><b><span style='font-family:
 Consolas'>RDNAP</span></b><span style='font-family:"Book Antiqua"'>, en klaar
 ben je. </span></p>
 
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
-
 <p><span style='font-family:"Book Antiqua"'>Gebruik
 van de macro staat beschreven in de header. Het is geschreven binnen SAS studio.
 Ik sla macro’s op in een SAS autocall library. Dus als je <b>gm_rdnaptrans2018.sas</b>
 daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code werken.</span></p>
 
-<p><span style='font-family:"Book Antiqua"'>&nbsp;</span></p>
-
 <p><span style='font-family:"Book Antiqua"'>Misschien
 handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te
-doen:</span></p>
+doen:</span></br>
 
-<p><span style='font-size:5.0pt;font-family:Consolas'>&nbsp;</span></p>
+<span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</span></br>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</span></p>
+<span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v2</span></br>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v2</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018,
+<span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_grid_v2(RDNAP.RDCORR2018,
 RDNAP.NLGEO2018)</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-family:"Book Antiqua"'>Hier staan
 alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</span></p>
-
-<p><span style='font-size:5.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%gm_rdnaptrans2018</span></p>
 
@@ -192,15 +162,12 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%self_validation_RD_v2(RDNAP)</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%display_self_validation_results(RDNAP)</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_pseudo_validatation_v2(RDNAP)</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_ETRS89_v1(RDNAP,
 /folders/myfolders/sasuser.v94/files/output/CERTIFY_ETRS89_v1.txt)</span></p>
@@ -214,7 +181,6 @@ RDNAP.NLGEO2018)</span></p>
 <p><span style='font-size:10.0pt;font-family:Consolas'>%certify_validation_RD_v2(RDNAP,
 /folders/myfolders/sasuser.v94/files/output/CERTIFY_RDNAP_v2.txt)</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1()</span></p>
 
@@ -228,7 +194,6 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(52,
 5, 0)</span></p>
@@ -240,7 +205,6 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(51.999994787,
 4.999992597, -0.022)</span></p>
@@ -249,10 +213,6 @@ RDNAP.NLGEO2018)</span></p>
 7.78, 45)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(54.000005178272,
 7.000008038945, 12.02079392 )</span></p>
@@ -264,7 +224,6 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_output_v1</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs_itrs_ini_v1(pItrf=ITRF2014)</span></p>
 
@@ -273,7 +232,6 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%etrs89itrs2014wgs84_output_v1;</span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%ETRS89_to_WGS84_v1(51.999994814,
 4.999992333, 42.9821)</span></p>
@@ -283,7 +241,6 @@ RDNAP.NLGEO2018)</span></p>
 <p><span style='font-size:10.0pt;font-family:Consolas'>%WGS84_to_ETRS89_v1(51.999994805,
 4.999992317, 42.982, -1)</span></p>
 
-<p><span style='font-family:Consolas'>&nbsp;</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_ini_v1(RDNAP)</span></p>
 
@@ -314,10 +271,6 @@ RDNAP.NLGEO2018)</span></p>
 
 <p><span style='font-size:10.0pt;font-family:Consolas'>%rdnaptrans2018_output_v1</span></p>
 
-<p><span style='font-family:Consolas'>&nbsp;</span></p>
-
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
-
 <p><b><u><span style='font-size:16.0pt;font-family:"Book Antiqua"'>Macro
 Overzicht</span></u></b></p>
 
@@ -326,7 +279,6 @@ Overzicht</span></u></b></p>
 <p><span style='font-size:10.0pt;font-family:"Book Antiqua"'>Overzicht
 van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. </span></p>
 
-<p><span style='font-size:10.0pt;font-family:Consolas'>&nbsp;</span></p>
 
 <table border=1 cellspacing=0 cellpadding=0 width=587
  style='width:440.4pt;border-collapse:collapse;border:none'>
