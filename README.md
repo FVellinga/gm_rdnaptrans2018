@@ -42,7 +42,7 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
   <p>V1</p>
   </td>
   <td>
-   <p>Maakt <i><strong>geen</strong></i> gebruik van data sets als input/input. De datasetless benadering. De input/output zijn macro
+   <p>Maakt <i><strong>geen</strong></i> gebruik van data sets als input/output. De <i>datasetless</i> benadering. De input/output zijn macro
   variabelen. Geschikt als je één coördinatenpaar wilt transformeren.</p>
   </td>
  </tr>
@@ -51,7 +51,7 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
   <p>V2</p>
   </td>
   <td>
-  <p>Maakt gebruik van data sets als input/input. Geschikt voor bulk transformaties. Vrij rap volgens mij.</p>
+  <p>Maakt gebruik van data sets als input/output. Geschikt voor bulk transformaties. Vrij rap volgens mij. Het is wel zo, dat het initialiseren van de grid als macro variabelen een paar seconden kan duren.</p>
   </td>
  </tr>
 </table>
