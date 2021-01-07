@@ -42,7 +42,7 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
   <p>V1</p>
   </td>
   <td>
-  <p>Maakt geen gebruik van data sets als input/input. De datasetless benadering. De input/output zijn macro
+   <p>Maakt <i><strong>geen</strong></i> gebruik van data sets als input/input. De datasetless benadering. De input/output zijn macro
   variabelen. Geschikt als je één coördinatenpaar wilt transformeren.</p>
   </td>
  </tr>
