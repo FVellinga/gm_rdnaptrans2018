@@ -3457,15 +3457,15 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   
   %* Rename the transformation fields;
   %if %sysfunc(findc(&pDSout,'.')) ne 0 %then %do;
-    %let lmv_lib = %scan(&pDSout,1,'.');
-    %let lmv_ds = %scan(&pDSout,2,'.');
+    %let lmv_lib_out = %scan(&pDSout,1,'.');
+    %let lmv_ds_out = %scan(&pDSout,2,'.');
   %end;
   %else %do;
-    %let lmv_lib = WORK;
-    %let lmv_ds = &pDSout;
+    %let lmv_lib_out = WORK;
+    %let lmv_ds_out = &pDSout;
   %end;  
-  proc datasets library=&lmv_lib nolist; 
-    modify &lmv_ds;
+  proc datasets library=&lmv_lib_out nolist; 
+    modify &lmv_ds_out;
     %if &pDirection eq 1 %then %do;
       rename tr_lat=ETRS89_lat tr_lon=ETRS89_lon tr_h=ETRS89_h;
     %end;
