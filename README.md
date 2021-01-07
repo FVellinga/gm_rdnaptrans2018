@@ -71,10 +71,13 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 <p>Misschien handiger om eerst te beperken tot het inladen van de grids etc. en dan dit te doen:</br>
 <i>
 %gm_rdnaptrans2018</br>
+%grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
+%grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
+%self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</br>
 %rdnaptrans2018_ini_v2</br>
 %rdnaptrans2018_grid_v2(RDNAP.RDCORR2018, RDNAP.NLGEO2018)</i></p>
 
-<p>Nu volgen alle relevantie macro calls. Je hoeft trouwens niet steeds een ini call te doen.</p>
+<p>Nu volgen alle relevante macro calls. Je hoeft trouwens niet steeds een ini call te doen.</p>
 <p><i>%gm_rdnaptrans2018</br>
 %grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
 %grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
