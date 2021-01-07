@@ -116,7 +116,7 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 
 # Macro Overzicht
 
-<p>Overzicht van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten.</p>
+<p>Overzicht van de macro’s die in <b>gm_rdnaptrans2018.sas</b> zitten. (Regelnummering is benadering.)</p>
 
 <table>
  <tr>
@@ -124,7 +124,7 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
   <p><b>#</b></p>
   </td>
   <td>
-  <p><b>Linenumber</b></p>
+  <p><b>Regelnummer</b></p>
   </td>
   <td>
   <p><b>Macro</b></p>
