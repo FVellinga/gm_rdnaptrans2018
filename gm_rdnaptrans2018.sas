@@ -30,15 +30,18 @@ Example version 2:
   %ETRS89_to_RD_v2(DataSetIn, DataSetOut)
   
 Version:
-1.0 - 20201008: Fred Vellinga, Initial version. V1 version.
+1.0 - 20191008: Fred Vellinga, Initial version. V1 version.
                 (This version is certified.)
-1.1 - 20201019: Fred Vellinga, version 2 solution added.
+1.1 - 20191019: Fred Vellinga, version 2 solution added.
                 (This version is also certified.)
-1.2 - 20201027: Fred Vellinga, ETRS to ITRS transformation added. ITRF2008/ITRF2014 can regarded as equal to WGS84.
+1.2 - 20191027: Fred Vellinga, ETRS to ITRS transformation added. ITRF2008/ITRF2014 can regarded as equal to WGS84.
                 ITRF2008≈WGS84-G1762. Please note this has nothing to do with the RDNAPTRANS™2018 trademark.
                 That trademark only applies to the RD to ETRS89 (both ways) transformation.
 1.3 - 20210102: Fred Vellinga, Self-validation and certification functionality added. The user can verify if the code
                 still meets the certification criteria.
+1.4 - 20210107: Fred Vellinga, Suppress parameter added. Suppresses all intermediate variables in the output. Default on.
+                Height value is now an optional column in the input dataset. When not exists, it is automatically set
+                to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method.
                 
 USAGE EXPLANATION:
 ------------------
@@ -163,6 +166,7 @@ V2 usage:
 Note: H and h have different meaning. H is the height in RD NAP (Normaal Amsterdam Peil) and is not perpendicular on x, y. 
       h is the ETRS89 height and is perpendicular on lat, lon. The dimension is in both case the same, meters.
       (Because SAS is case insensitive, the variables h and H are the same.)
+Note: H or h are not mandatory in the input dataset. When not specified, H or h is added and set to -999999.
   
 RD to WGS84 transformation:
 ---------------------------
@@ -206,8 +210,10 @@ A height value is mandatory. Set to zero when there is no height.
 Input | to ETRS89 output | to WGS84 output
 ------+------------------+----------------
  lat  |    ETRS89_lat    | WGS84_lat   
- lon  |    ETRS89_lon    | WGS84_lat
-   h  |    ETRS89_height | WGS84_height
+ lon  |    ETRS89_lon    | WGS84_lon
+   h  |    ETRS89_h      | WGS84_h
+
+Note: h is not mandatory in the input dataset. When not specified, h is added and set to -999999.
 
 A sort of pseudo validation is provided:   
 %WGS84_pseudo_validatation(library)
@@ -1584,20 +1590,42 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   quit;
 %mend rdnaptrans2018_grid_v2;
 
-%macro ETRS89_to_RD_v2(pDSin  /* The dataset that contains lat, lon and h that must be transformed to RDNAP */
-                      ,pDSout /* The output dataset */);
+%macro ETRS89_to_RD_v2(pDSin        /* The dataset that contains lat, lon and h that must be transformed to RDNAP */
+                      ,pDSout       /* The output dataset */
+                      ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
   /*
   Convert ETRS89 lat lon h coordinate pair to RD NAP x y H coordinate pair.
   Variables are re-used. So the content of the output dataset reflects the end status of a row. Any intermediate
   variable results are not stored. 
-  The input variables are mandatory. When no height conversion is needed, then set h to -999999.
+  The input variable are mandatory. When no height conversion is needed, then set h to -999999.
    Input | Output
   -------+--------
     lat  |  RD_x
     lon  |  RD_y
-      h  |  RD_H
-  A lot of columns (more than 100) are added to the output dataset.
+      h  |  RD_H 
+  A lot of columns (more than 100) are added to the output dataset. But they can be suppresed.
   */
+  
+  %* Add the height column, if not specified;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+    %let lmv_lib = %scan(&pDSin,1,'.');
+    %let lmv_ds = %scan(&pDSin,2,'.');
+  %end; 
+  %else %do;
+    %let lmv_lib = WORK;
+    %let lmv_ds = &pDSin;
+  %end;
+  proc sql noprint;
+    select count(*) into :lmv_height_missing from DICTIONARY.columns
+    where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
+  quit;
+  %if &lmv_height_missing eq 0 %then %do;
+    proc sql;
+      alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
+      update &pDSin set h = -999999;
+    quit;  
+  %end;
+
   data &pDSout;
     set &pDSin;
     format phi labda h BEST32.;
@@ -1889,10 +1917,26 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     end;
     else RD_H = -999999;
   run;
+  
+  %* Keep only the transformation result. Suppress all others;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the RD transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y RD_H;
+    %put &=lmv_DSin_columns;
+    data &pDSout;
+      set &pDSout;
+      keep &lmv_DSin_columns;
+    run;
+  %end;
 %mend ETRS89_to_RD_v2;
 
-%macro RD_to_ETRS89_v2(pDSin  /* The dataset that contains x, y and z that must be transformed to ETRS89 */
-                      ,pDSout /* The output dataset */);
+%macro RD_to_ETRS89_v2(pDSin        /* The dataset that contains x, y and z that must be transformed to ETRS89 */
+                      ,pDSout       /* The output dataset */
+                      ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);                     
   /*
   Convert RDNAP x y H coordinate pair to ETRS89 lat lon h coordinate pair.
   Variables are re-used. So the content of the output dataset reflects the end status of a row. Any intermediate
@@ -1903,8 +1947,29 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      x   | ETRS89_lat
      y   | ETRS89_lon
      H   | ETRS89_h
-  A lot of columns (more than 100) are added to the output dataset.
+  A lot of columns (more than 100) are added to the output dataset. But they can be suppressed
   */
+ 
+  %* Add the height column, if not specified;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+    %let lmv_lib = %scan(&pDSin,1,'.');
+    %let lmv_ds = %scan(&pDSin,2,'.');
+  %end; 
+  %else %do;
+    %let lmv_lib = WORK;
+    %let lmv_ds = &pDSin;
+  %end;
+  proc sql noprint;
+    select count(*) into :lmv_height_missing from DICTIONARY.columns
+    where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
+  quit;
+  %if &lmv_height_missing eq 0 %then %do;
+    proc sql;
+      alter table &pDSin add H num format=BEST32.;        %* SAS does not support a default option;
+      update &pDSin set H = -999999;
+    quit;  
+  %end;
+ 
   data &pDSout;
     set &pDSin;
     format x y BEST32.;                                         %* the input. the RD x y coordinates;
@@ -2168,6 +2233,21 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     end;
     else ETRS89_h = -999999;
   run;
+  
+  %* Keep only the transformation result. Suppress all others;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon ETRS89_h;
+    %put &=lmv_DSin_columns;
+    data &pDSout;
+      set &pDSout;
+      keep &lmv_DSin_columns;
+    run;
+  %end;
 %mend RD_to_ETRS89_v2;
 
 %***************************************************************************;
@@ -3201,28 +3281,52 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_epsilon_itrs_threshold radian; 
 %mend etrs_itrs_ini_v2;
 
-%macro WGS84_to_ETRS89_v2(pDSin       /* The input data set. Must contain variables lat lon and h in decimal degrees */
-                         ,pDSout      /* The output data set */);
-  %lm_WGS84_to_ETRS89_v2(&pDSin, &pDSout, 1)                            
+%macro WGS84_to_ETRS89_v2(pDSin        /* The input data set. Must contain variables lat lon and h in decimal degrees */
+                         ,pDSout       /* The output data set */
+                         ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
+  %lm_WGS84_to_ETRS89_v2(&pDSin, &pDSout, 1, &pSuppress)                            
 %mend WGS84_to_ETRS89_v2;
 
-%macro ETRS89_to_WGS84_v2(pDSin       /* The input data set. Must contain variables lat lon and h in decimal degrees */
-                         ,pDSout      /* The output data set */);
-  %lm_WGS84_to_ETRS89_v2(&pDSin, &pDSout, -1)                            
+%macro ETRS89_to_WGS84_v2(pDSin        /* The input data set. Must contain variables lat lon and h in decimal degrees */
+                         ,pDSout       /* The output data set */
+                         ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */); 
+  %lm_WGS84_to_ETRS89_v2(&pDSin, &pDSout, -1, &pSuppress)                            
 %mend ETRS89_to_WGS84_v2;
 
-%macro lm_WGS84_to_ETRS89_v2(pDSin       /* The input data set. Must contain variables lat lon and h in decimal degrees */
-                            ,pDSout      /* The output data set */
-                            ,pDirection  /* The transformation direction, 1 (WGS84 to ETRS89) or -1 (ETRS89 to WGS84 */);
+%macro lm_WGS84_to_ETRS89_v2(pDSin        /* The input data set. Must contain variables lat lon and h in decimal degrees */
+                            ,pDSout       /* The output data set */
+                            ,pDirection   /* The transformation direction, 1 (WGS84 to ETRS89) or -1 (ETRS89 to WGS84 */
+                            ,pSuppress    /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
   /*
   Transform WGS84 to ETRS89 or ETRS89 to WGS84, depending the direction.
   Input | Output (1)      Output (-1)
   ------+----------------------------
    lat  | ETRS89_lat     WGS84_lat   
-   lon  | ETRS89_lon     WGS84_lat
-     h  | ETRS89_height  WGS84_height
+   lon  | ETRS89_lon     WGS84_lon
+     h  | ETRS89_h       WGS84_h
   A height value is mandatory. Set to zero when there is no height.
   */
+ 
+  %* Add the height column, if not specified;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+    %let lmv_lib = %scan(&pDSin,1,'.');
+    %let lmv_ds = %scan(&pDSin,2,'.');
+  %end; 
+  %else %do;
+    %let lmv_lib = WORK;
+    %let lmv_ds = &pDSin;
+  %end;
+  proc sql noprint;
+    select count(*) into :lmv_height_missing from DICTIONARY.columns
+    where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
+  quit;
+  %if &lmv_height_missing eq 0 %then %do;
+    proc sql;
+      alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
+      update &pDSin set h = 0;
+    quit;  
+  %end;
+ 
   data &pDSout;
     set &pDSin;
     format a_grs80 f_grs80 e_square_grs80 epsilon BEST32.;
@@ -3363,12 +3467,28 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   proc datasets library=&lmv_lib nolist; 
     modify &lmv_ds;
     %if &pDirection eq 1 %then %do;
-      rename tr_lat=ETRS89_lat tr_lon=ETRS89_lon tr_h=ETRS89_height;
+      rename tr_lat=ETRS89_lat tr_lon=ETRS89_lon tr_h=ETRS89_h;
     %end;
     %else %do;
-      rename tr_lat=WGS84_lat tr_lon=WGS84_lon tr_h=WGS84_height;
+      rename tr_lat=WGS84_lat tr_lon=WGS84_lon tr_h=WGS84_h;
     %end;
   quit;
+  
+  %* Keep only the transformation result. Suppress all others;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %if &pDirection eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon ETRS89_h;
+    %else %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon WGS84_h;
+    %put &=lmv_DSin_columns;
+    data &pDSout;
+      set &pDSout;
+      keep &lmv_DSin_columns;
+    run;
+  %end;
 %mend lm_WGS84_to_ETRS89_v2;
 
 %macro WGS84_pseudo_validatation_v2(pLib /* The library where CERTIFY_RDNAP_V2 is stored */);
@@ -3385,7 +3505,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %ETRS89_to_WGS84_v2(tmp_data, ETRS89_to_WGS84_V2);
 
   data &pLib..ETRS89_to_WGS84_V2;
-    set ETRS89_to_WGS84_V2 (keep=point_id lat lon h WGS84_lat WGS84_lon WGS84_height);
+    set ETRS89_to_WGS84_V2 (keep=point_id lat lon h WGS84_lat WGS84_lon WGS84_h);
     format dlat dlon dh BEST32.;
     dlat = abs(lat - WGS84_lat);
     dlon = abs(lon - WGS84_lon);
@@ -3396,7 +3516,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       else lon_conv_ok = 0;
     if lat_conv_ok eq 1 and lon_conv_ok eq 1 then lat_lon_conv_ok = 1;
       else lat_lon_conv_ok = 0;
-    if WGS84_height eq -999999 then h_conv_ok = 1;
+    if WGS84_h eq -999999 then h_conv_ok = 1;
     else if dh lt 0.05 then h_conv_ok = 1;
          else h_conv_ok = 0;
   run;
@@ -3415,13 +3535,13 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   quit;
  
   data tmp_data;
-    set &pLib..ETRS89_to_WGS84_V2 (keep=point_id WGS84_lat WGS84_lon WGS84_height);
-    rename WGS84_lat=lat WGS84_lon=lon WGS84_height=h;
+    set &pLib..ETRS89_to_WGS84_V2 (keep=point_id WGS84_lat WGS84_lon WGS84_h);
+    rename WGS84_lat=lat WGS84_lon=lon WGS84_h=h;
   run;
   %WGS84_to_ETRS89_v2(tmp_data, WSG84_to_ETRS89_V2)
   
   data &pLib..WSG84_to_ETRS89_V2;
-    set WSG84_to_ETRS89_V2 (keep=point_id lat lon h ETRS89_lat ETRS89_lon ETRS89_height);
+    set WSG84_to_ETRS89_V2 (keep=point_id lat lon h ETRS89_lat ETRS89_lon ETRS89_h);
     format dlat dlon dh BEST32.;
     dlat = abs(lat - ETRS89_lat);
     dlon = abs(lon - ETRS89_lon);
@@ -3432,7 +3552,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       else lon_conv_ok = 0;
     if lat_conv_ok eq 1 and lon_conv_ok eq 1 then lat_lon_conv_ok = 1;
       else lat_lon_conv_ok = 0;
-    if ETRS89_height eq -999999 then h_conv_ok = 1;
+    if ETRS89_h eq -999999 then h_conv_ok = 1;
     else if dh lt 0.05 then h_conv_ok = 1;
          else h_conv_ok = 0;
   run;
