@@ -2,7 +2,7 @@
 
 <p>Lees als: global macro rdnaptran2018.sas</p>
 
-# De Theorie
+# Inleiding
 
 <p>De SAS macro <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse <b>RD NAP</b> (<b>R</b>ijks<b>D</b>riehoeksmeting en <b>N</b>ormaal
 <b>A</b>msterdam <b>P</b>eil) coördinaten omzet, transformeert, naar <b>ETRS89</b> (<b>E</b>uropean <b>T</b>errestrial <b>R</b>eference
@@ -17,7 +17,6 @@ en meters (de hoogte).</p>
 hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transformatie
 en is <b><i>niet</i></b> onderdeel van het handelsmerk <b>RDNAPTRANS™2018</b>.</p>
 
-
 <p>Los van alle details kan het volgende gezegd worden:
 </br>Er is maar één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </br>
 
@@ -30,7 +29,7 @@ kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een vorm
 aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen Deze code geeft die waarschuwing (nog) niet.</p>
 
-<p>Tot zover de theorie. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
+<p>Tot zover de inleiding. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
 
 # De Code
 
