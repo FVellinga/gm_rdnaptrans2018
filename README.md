@@ -1,6 +1,7 @@
 # gm_rdnaptrans2018.sas
 
-<p>Lees als: global macro rdnaptran2018.sas</p>
+<p>Lees als: global macro rdnaptran2018.sas</br>
+Het is een suite/verzameling van macros t.b.v. RD NAP <-> ETRS89 <-> WGS84 datum transformaties</p>
 
 # Inleiding
 
