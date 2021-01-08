@@ -41,7 +41,7 @@ Version:
                 still meets the certification criteria.
 1.4 - 20210107: Fred Vellinga, Suppress parameter added. Suppresses all intermediate variables in the output. Default on.
                 Height value is now an optional column in the input dataset. When not exists, it is automatically set
-                to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method.
+                to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method. Also not available in the output;
                 
 USAGE EXPLANATION:
 ------------------
@@ -912,7 +912,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
 %macro height_transformation(pLat  /* The latitude in decimal degrees */
                             ,pLon  /* The longitude in decimal degrees */
                             ,pH    /* The height. In NAP meter, or ETRS89 meter */
-                            ,pType /* The conversion type: 1:from ETRS89 to RD, 2: from RD to ETRS89 */);
+                            ,pType /* The conversion type: 1: from ETRS89 to RD, 2: from RD to ETRS89 */);
   /*
   ETRS89 to RD:
   The ellipsoidal height is not used with RD coordinates as it is purely geometrical and has no physical meaning. The
@@ -1616,10 +1616,10 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_ds = &pDSin;
   %end;
   proc sql noprint;
-    select count(*) into :lmv_height_missing from DICTIONARY.columns
+    select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
   quit;
-  %if &lmv_height_missing eq 0 %then %do;
+  %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
       update &pDSin set h = -999999;
@@ -1918,6 +1918,14 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     else RD_H = -999999;
   run;
   
+  %* If no height in the input, then also no height in the output;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin drop h;
+      alter table &pDSout drop h, RD_H;
+    quit;  
+  %end;
+  
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
     %* Get the columns from the input dataset and then add the RD transformation values to it;
@@ -1925,7 +1933,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
       where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
     quit;
-    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y RD_H;
+    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y;
+    %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns RD_H;;
     %put &=lmv_DSin_columns;
     data &pDSout;
       set &pDSout;
@@ -1960,10 +1969,10 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_ds = &pDSin;
   %end;
   proc sql noprint;
-    select count(*) into :lmv_height_missing from DICTIONARY.columns
+    select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
   quit;
-  %if &lmv_height_missing eq 0 %then %do;
+  %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin add H num format=BEST32.;        %* SAS does not support a default option;
       update &pDSin set H = -999999;
@@ -2234,6 +2243,14 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     else ETRS89_h = -999999;
   run;
   
+  %* If no height in the input, then also no height in the output;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin drop H;
+      alter table &pDSout drop H, ETRS89_h;
+    quit;  
+  %end;
+  
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
     %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
@@ -2241,7 +2258,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
       where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
     quit;
-    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon ETRS89_h;
+    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;
+    %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
     %put &=lmv_DSin_columns;
     data &pDSout;
       set &pDSout;
@@ -2599,7 +2617,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format dlat dlon dh BEST32.;
     dlat = abs(lat - ETRS89_lat);
     dlon = abs(lon - ETRS89_lon);
-    dh = abs(etrs_h - ETRS89_h);;
+    dh = abs(etrs_h - ETRS89_h);
     if dlat lt 0.00000001 then lat_conv_ok = 1;
       else lat_conv_ok = 0;
     if dlon lt 0.00000001 then lon_conv_ok = 1;
@@ -2973,7 +2991,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_ETRS89_lon_dec degrees;
   %put &=gmv_ETRS89_height meter;
 
-  %put &=gmv_ITRS_lat_dec degrees;;
+  %put &=gmv_ITRS_lat_dec degrees;
   %put &=gmv_ITRS_lon_dec degrees;
   %put &=gmv_ITRS_height meter;
   
@@ -3317,10 +3335,10 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_ds = &pDSin;
   %end;
   proc sql noprint;
-    select count(*) into :lmv_height_missing from DICTIONARY.columns
+    select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
   quit;
-  %if &lmv_height_missing eq 0 %then %do;
+  %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
       update &pDSin set h = 0;
@@ -3473,6 +3491,14 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       rename tr_lat=WGS84_lat tr_lon=WGS84_lon tr_h=WGS84_h;
     %end;
   quit;
+    
+  %* If no height in the input, then also no height in the output;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin drop h;
+      alter table &pDSout drop h %if &pDirection eq 1 %then , ETRS89_h; %else , WGS84_h;;
+    quit;  
+  %end;
   
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
@@ -3481,8 +3507,14 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
       where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
     quit;
-    %if &pDirection eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon ETRS89_h;
-    %else %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon WGS84_h;
+    %if &pDirection eq 1 %then %do;
+      %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;;
+      %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
+    %end;
+    %else %do;
+       %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon;;
+       %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns WGS84_h;;
+    %end;
     %put &=lmv_DSin_columns;
     data &pDSout;
       set &pDSout;
@@ -3493,9 +3525,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
 
 %macro WGS84_pseudo_validatation_v2(pLib /* The library where CERTIFY_RDNAP_V2 is stored */);
   /*
-  This pseudo validation takes dataset CERTIFY_RDNAP_V2 as input. There you have ETRS89 coordinates. They are transformed
-  to WGS84 and then back to ETRS89. Then compared to CERTIFY_RDNAP_V2. The coordinates should be equal.
-  No version one exists.
+  This pseudo validation takes dataset CERTIFY_RDNAP_V2 as input. There you have ETRS89 coordinates. They are transformed to WGS84 and then 
+  back to ETRS89. Then compared to CERTIFY_RDNAP_V2. The coordinates should be equal. No version one exists.
   */
   %etrs_itrs_ini_v2
   data tmp_data;
@@ -3509,7 +3540,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format dlat dlon dh BEST32.;
     dlat = abs(lat - WGS84_lat);
     dlon = abs(lon - WGS84_lon);
-    dh = abs(h - WGS84_height);;
+    dh = abs(h - WGS84_h);
     if dlat lt 0.00005 then lat_conv_ok = 1;
       else lat_conv_ok = 0;
     if dlon lt 0.00005 then lon_conv_ok = 1;
@@ -3525,7 +3556,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     title1 '10000 points are transformed from ETRS89 to WGS84.';
     title2 'lat and lon accuracy is 0.00005 degree, h accuracy is 0.05 meters';
     select max(dlat) as max_dlat, max(dlon) as max_dlon,
-    (select max(dh) from &pLib..ETRS89_to_WGS84_V2 where WGS84_height ne -999999) as max_dh,
+    (select max(dh) from &pLib..ETRS89_to_WGS84_V2 where WGS84_h ne -999999) as max_dh,
     (select sum(lat_conv_ok) from &pLib..ETRS89_to_WGS84_V2) as dlat,
     (select sum(lon_conv_ok) from &pLib..ETRS89_to_WGS84_V2) as dlon,
     (select sum(lat_lon_conv_ok) from &pLib..ETRS89_to_WGS84_V2) as dlatdlon,
@@ -3545,7 +3576,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format dlat dlon dh BEST32.;
     dlat = abs(lat - ETRS89_lat);
     dlon = abs(lon - ETRS89_lon);
-    dh = abs(h - ETRS89_height);;
+    dh = abs(h - ETRS89_h);
     if dlat lt 0.00005 then lat_conv_ok = 1;
       else lat_conv_ok = 0;
     if dlon lt 0.00005 then lon_conv_ok = 1;
@@ -3561,7 +3592,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     title1 '10000 points are transformed from WGS84 to ETRS89.';
     title2 'lat and lon accuracy is 0.00005 degree, h accuracy is 0.05 meters';
     select max(dlat) as max_dlat, max(dlon) as max_dlon,
-    (select max(dh) from &pLib..WSG84_to_ETRS89_V2 where ETRS89_height ne -999999) as max_dh,
+    (select max(dh) from &pLib..WSG84_to_ETRS89_V2 where ETRS89_h ne -999999) as max_dh,
     (select sum(lat_conv_ok) from &pLib..WSG84_to_ETRS89_V2) as dlat,
     (select sum(lon_conv_ok) from &pLib..WSG84_to_ETRS89_V2) as dlon,
     (select sum(lat_lon_conv_ok) from &pLib..WSG84_to_ETRS89_V2) as dlatdlon,
@@ -3577,7 +3608,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     title4 'You should not get any report output below here. Then all ok.';
     select round(abs(T1.ETRS89_lat - T2.ETRS89_lat),0.00000000001) as dlat
           ,round(abs(T1.ETRS89_lon - T2.ETRS89_lon),0.00000000001) as dlon
-          ,round(abs(T1.ETRS89_h - T2.ETRS89_height),0.0000001) as dh
+          ,round(abs(T1.ETRS89_h - T2.ETRS89_h),0.0000001) as dh
           ,T1.ETRS89_lat as a, T2.ETRS89_lat as b
     from  &pLib..CERTIFY_RDNAP_V2 as T1,
           &pLib..WSG84_to_ETRS89_V2 as T2
