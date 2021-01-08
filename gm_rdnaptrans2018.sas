@@ -1,6 +1,7 @@
 /*
 GM_RDNAPTRANS2018 (pronounce as global macro RDNAPTRANS2018)
 This program is officially validated and may carry the following trademark: RDNAPTRANS™2018
+It is a suite of SAS macros that performs RD NAP <-> ETRS89 <-> WGS84 datum transformations.
 
 Coordinate transformation to and from Stelsel van de Rijksdriehoeksmeting and Normaal Amsterdams Peil.
 - Transformation from ETRS89 to RD.
@@ -1555,22 +1556,36 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
 %mend rdnaptrans2018_ini_v2;
 
 %macro rdnaptrans2018_grid_v2(pRDgrid /* Dataset that contains the RD correction grid */
-                             ,pHgrid  /* Datatset that contains the NLGEO2018 height values grid*/);
+                             ,pHgrid  /* Datatset that contains the NLGEO2018 height values grid */);
   /* 
-  Load the RD correction grid and the NLGEO height grid into an array of macro variables
+  Load the RD correction grid and the NLGEO height grid into an array of macro variables.
   A fixed naming column schema is expected:
   RDCORR2018 | NLGEO2018
-  -----------+----------
+  -----------+-----------
          i   |          i
-  lat_corr   |  etrs89_lat
-  lon_corr   |  etrs89_lon
-    rd_lat   |  nap_height
+  lat_corr   | etrs89_lat
+  lon_corr   | etrs89_lon
+    rd_lat   | nap_height
     rd_lon   |
   The following macro variables are needed/created in the range 1 - 144781
   - rdcorr2018_lat_corr_[1-144781]
   - rdcorr2018_lon_corr_[1-144781]
   - nlgeo2018_nap_height_[1-144781]
   */
+ 
+  %* Temporarily turn off any logging. Any current settings may give problems. For me it crashed at EG 7.1;
+  proc sql noprint;
+    select setting, cats('NO',optname) as options_off 
+           into :lmv_options_session separated by ' '
+               ,:lmv_options_off separated by ' '
+    from DICTIONARY.options
+    where group in ('MACRO', 'LOGCONTROL') 
+     and opttype eq 'Boolean'
+     and optstart eq 'anytime'
+     and optname ne 'MACRO';
+  quit;
+  options &lmv_options_off;  %* turn off all logging;
+  
   %do i = 1 %to 144781;
     %global rdcorr2018_lat_corr_&i;
     %global rdcorr2018_lon_corr_&i;
@@ -1588,6 +1603,9 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     from &pHgrid
     order by i;
   quit;
+  
+  %* Restore the session options setting;
+  options &lmv_options_session; 
 %mend rdnaptrans2018_grid_v2;
 
 %macro ETRS89_to_RD_v2(pDSin        /* The dataset that contains lat, lon and h that must be transformed to RDNAP */
@@ -2391,14 +2409,18 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   0.000338  0.000757  0.000051  10000  10000  10000  10000
   */
  
-  %* Set notes option to nonotes, if applicable;
+  %* Temporarily turn off any logging, for speeding;
   proc sql noprint;
-    select setting into: lmv_option_setting from DICTIONARY.options
-    where optname = 'NOTES';
+    select setting, cats('NO',optname) as options_off 
+           into :lmv_options_session separated by ' '
+               ,:lmv_options_off separated by ' '
+    from DICTIONARY.options
+    where group in ('MACRO', 'LOGCONTROL') 
+     and opttype eq 'Boolean'
+     and optstart eq 'anytime'
+     and optname ne 'MACRO';
   quit;
-  %if &lmv_option_setting eq NOTES %then %do;
-    options nonotes;
-  %end;
+  options &lmv_options_off;  %* turn off all logging;
   
   %rdnaptrans2018_ini_v1(&pLib)
   proc sql noprint;
@@ -2426,7 +2448,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
 
   %* 100% score is achieved when all three coordinates are smaller then 1mm;
   data &pLib..SELF_ETRS89_V1;
-    set SELF_ETRS89_V1 (drop=i);
+    set SELF_ETRS89_V1 (drop=i where=(xc ne .));
     format dx dy dz BEST32.;
     dx = abs(xc - x);
     dy = abs(yc - y);
@@ -2455,10 +2477,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     title;
   quit;
   
-  %* Restore original notes option setting;  
-  %if &lmv_option_setting eq NOTES %then %do;
-    options notes;
-  %end;
+  %* Restore the session options setting;
+  options &lmv_options_session;
 %mend self_validation_ETRS89_v1;
 
 %macro self_validation_RD_v1(pLib  /* the library where the self-validation dataset is stored */);
@@ -2472,14 +2492,18 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   3.534E-8  4.247E-8  0.000051  9774  9857    9761    10000
   */
 
-  %* Set notes option to nonotes, if applicable;
+  %* Temporarily turn off any logging, for speeding;
   proc sql noprint;
-    select setting into: lmv_option_setting from DICTIONARY.options
-    where optname = 'NOTES';
+    select setting, cats('NO',optname) as options_off 
+           into :lmv_options_session separated by ' '
+               ,:lmv_options_off separated by ' '
+    from DICTIONARY.options
+    where group in ('MACRO', 'LOGCONTROL') 
+     and opttype eq 'Boolean'
+     and optstart eq 'anytime'
+     and optname ne 'MACRO';
   quit;
-  %if &lmv_option_setting eq NOTES %then %do;
-    options nonotes;
-  %end;
+  options &lmv_options_off;  %* turn off all logging;
   
   %rdnaptrans2018_ini_v1(&pLib)
   proc sql noprint;
@@ -2508,7 +2532,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   
   %* 100% score is achieved when all three coordinates are smaller then 0.00000001 meter. That is not gonna happen here;
   data &pLib..SELF_RDNAP_V1;
-    set SELF_RDNAP_V1 (drop=i);
+    set SELF_RDNAP_V1 (drop=i where=(latc ne .));
     format dlat dlon dh BEST32.;
     dlat = abs(latc - lat);
     dlon = abs(lonc - lon);
@@ -2539,10 +2563,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     title;
   quit;
   
-  %* Restore original notes option setting;  
-  %if &lmv_option_setting eq NOTES %then %do;
-    options notes;
-  %end;
+  %* Restore the session options setting;
+  options &lmv_options_session;
 %mend self_validation_RD_v1;
 
 %macro self_validation_ETRS89_v2(pLib  /* the library where the self-validation dataset is stored */);
