@@ -1,7 +1,7 @@
 # gm_rdnaptrans2018.sas
 
 <p>Lees als: global macro rdnaptran2018.sas</br>
-Het is een suite/verzameling van macros t.b.v. RD NAP <-> ETRS89 <-> WGS84 datum transformaties</p>
+Het is een suite/verzameling van macros t.b.v. <strong>RD NAP</strong> <-> <strong>ETRS89</strong> <-> <strong>WGS84 datum</strong> transformaties</p>
 
 # Inleiding
 
@@ -19,7 +19,7 @@ hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transfor
 en is <b><i>niet</i></b> onderdeel van het handelsmerk <b>RDNAPTRANS™2018</b>.</p>
 
 <p>Los van alle details kan het volgende gezegd worden:
-</br>Er is maar één manier om van <b>RD NAP</b> naar <b>WGS84</b> te komen: </br>
+</br>Er is maar één manier om van <b>RD NAP</b> naar <b>WGS84</b> (en terug) te komen: </br>
 
 RD NAP(1) -&gt; ETRS89(2) -&gt; ITRF2008(3) -&gt; WGS84(4)</br>
 (ITFR2008 is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</p>
