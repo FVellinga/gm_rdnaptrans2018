@@ -55,10 +55,17 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
   <p>Maakt gebruik van data sets als input/output. Geschikt voor bulk transformaties. Vrij rap volgens mij. Het is wel zo, dat het initialiseren van de grid als macro variabelen een paar seconden kan duren.</p>
   </td>
  </tr>
+ <tr>
+  <td>
+  <p>V3</p>
+  </td>
+  <td>
+   <p><strong>In ontwikkeling: </strong> Geoptimaliseerde versie van V2. Zo wordt er geen gebruik meer gemaakt van macro variabelen om de grid in te lezen. Nog niet beschikbaar in de code. Moet nog één keer testen.</p>
+  </td>
+ </tr> 
 </table>
 
-<p>Tevens moeten
-er twee grid files (tekst bestanden) worden ingeladen en opgeslagen worden als
+<p>Er moeten twee grid files (tekst bestanden) worden ingeladen en opgeslagen worden als
 dataset. Optioneel zijn het zogenaamde zelfvalidatie bestand en de twee certificatie
 validatie bestanden. Handig, want hiermee toon je aan dat deze code werkt.</p>
 
