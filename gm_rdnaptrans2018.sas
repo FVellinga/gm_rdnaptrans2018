@@ -10,12 +10,13 @@ Coordinate transformation to and from Stelsel van de Rijksdriehoeksmeting and No
 This implementation follows the flow as described in the RDNAPTRANS2018 document found at www.nsgi.nl
 All formulas and variables are explained there.
 
-Two different SAS implementations exists:
+Three different SAS implementations exists:
 V1  Datasetless solution: Input coordinates are supplied as macro parameters, output is returned as global macro variables.
     Recommended for single transformation. Not suitable for bulk transformations.
 V2  Dataset driven solution: Input dataset contains the coordinates that must be transformed. Output dataset is the input dataset
     enriched with the transformed coordinates. Use this method for bulk transformations.
-- The V1 version needs no data preparation. The V2 version needs data preparation to get working.
+v3  An optimization of V3. Array handling is improved.
+- The V1 version needs no data preparation. The V2/V3 version needs data preparation to get working.
 - A one time setup effort is needed to get the correction grids stored in a SAS library.
 
 Example version 1:
@@ -30,6 +31,10 @@ Example version 2:
   %rdnaptrans2018_grid_v2(RDcorrectionDataset, HeightCorrectionDataSet)
   %ETRS89_to_RD_v2(DataSetIn, DataSetOut)
   
+Example version 3:
+  %rdnaptrans2018_ini_v3
+  %ETRS89_to_RD_v2(DataSetIn, DataSetOut, LibGrid)  
+  
 Version:
 1.0 - 20191008: Fred Vellinga, Initial version. V1 version.
                 (This version is certified.)
@@ -42,13 +47,14 @@ Version:
                 still meets the certification criteria.
 1.4 - 20210107: Fred Vellinga, Suppress parameter added. Suppresses all intermediate variables in the output. Default on.
                 Height value is now an optional column in the input dataset. When not exists, it is automatically set
-                to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method. Also not available in the output;
+                to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method. Also not put in the output.
+1.5 - 20210130: V3 added. This in an optimization of V3. The grid is now stored in a temporary array.            
                 
 USAGE EXPLANATION:
 ------------------
 1. This macro, gm_rdnaptrans2018.sas itself, must also be stored somewhere. There are a number of techniques. When you do 
-   not use the Stored Compiled Macro Facility, you have to run macro gm_rdnaptrans2018.sas at least once.
-   Then the inside macros becomes available. Consider the SAS macro autocall facility.
+   not use the Stored Compiled Macro Facility, you have to run macro gm_rdnaptrans2018.sas at least once. Then the
+   inside macros becomes available. Consider the SAS macro autocall facility.
 2. Goto www.nsgi.nl and goto the RDNAPTRANS section.
 3. Request to download RDNAPTRANS2018. You have to fill in a form and then you will get a ZIP file. (Situation as oktober 2020)
 4. Open the ZIP file and locate directory Variant1 and save the grid filed rdcorr2018.txt and nlgeo2018.txt locally.
@@ -61,7 +67,7 @@ USAGE EXPLANATION:
    %grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)
    %grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)
    
-7. By now you have the grid correction datasets saved. A onetime effort. V1 and V2 makes use of it.
+7. By now you have the grid correction datasets saved. A onetime effort.
 
 Additional: A few macros exist to support the self-validation and certification validation. Use the self-validation to check
 if the transformation code is ok. Use the certification validation to certify this application, which already has been done.
@@ -162,13 +168,20 @@ V2 usage:
   outside the height grid that RDNAPTRAN2018 support. That is a valid result.
 
   %ETRS89_to_RD_v2(EtrsDataSetIn, RdDataSetOut)
-  %RD_to_ETRS89_v2(RdDataSetIn, EtrsDataSetOut
+  %RD_to_ETRS89_v2(RdDataSetIn, EtrsDataSetOut)
   
 Note: H and h have different meaning. H is the height in RD NAP (Normaal Amsterdam Peil) and is not perpendicular on x, y. 
       h is the ETRS89 height and is perpendicular on lat, lon. The dimension is in both case the same, meters.
       (Because SAS is case insensitive, the variables h and H are the same.)
 Note: H or h are not mandatory in the input dataset. When not specified, H or h is added and set to -999999.
-  
+
+V3 usage:
+---------
+  Identical to V2, except the loading of the grid into global macro variables no longer needed. It is now part of the
+  macro call itself.
+  %ETRS89_to_RD_v3(EtrsDataSetIn, RdDataSetOut, GridLibrary)
+  %RD_to_ETRS89_v3(RdDataSetIn, EtrsDataSetOut, GridLibrary)
+
 RD to WGS84 transformation:
 ---------------------------
 The route to transform RD coordinates to WGS84 is as follows:
@@ -204,6 +217,12 @@ V2 example:
 -----------
 %etrs_itrs_ini_v2
 %ETRS89_to_WGS84_v2(ETRS89dataset in, WGS84dataset out);
+
+V3 example:
+-----------
+%etrs_itrs_ini_v3
+%ETRS89_to_WGS84_v3(ETRS89dataset in, WGS84dataset out);
+(V3 is exactly the same as V2.)
 
 The input dataset must always have the variables lat, lon and h. They respresent the from cooordinate.
 A height value is mandatory. Set to zero when there is no height.
@@ -248,12 +267,12 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %* Needed for the autocall;
 %mend gm_rdnaptrans2018;
 
-%**********************************;
-%* BEGIN: version 1 (ETRS89 to RD) ;
-%**********************************;
+%***************************************;
+%* BEGIN: version 1 (ETRS89 to/from RD) ;
+%***************************************;
 
 %macro rdnaptrans2018_ini_v1(pLib /* The library where the RD correction grid dataset is stored */);
-  /* Initializes all RDNAPTRANS2018 transformation parameters and global macro variables */
+  %* Initializes all RDNAPTRANS2018 transformation parameters and global macro variables;
   %global gmv_rdnap_lib;                    %* the library were the RD correction dataset is stored;
   %let gmv_rdnap_lib = &pLib;
 
@@ -304,12 +323,12 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_GRS80_f;
   %put &=gmv_ETRS89_h0 meter;
 
-  /* Used for inverse transformation; RD to ETRS89 */
+  %* Used for inverse transformation: RD to ETRS89;
   %global gmv_epsilon_GRS80_threshold;            %* 𝜀 = precision threshold for termination of iteration, corresponding to 0.0001 m;
   %let gmv_epsilon_GRS80_threshold = %sysevalf(0.00000000002); 
   %put &=gmv_epsilon_GRS80_threshold radian;
 
-  /* Seven parameters for the 3D similarity transformation from ETRS89 to RD. */
+  %* Seven parameters for the 3D similarity transformation from ETRS89 to RD;
   %global gmv_tX;       %* translation in direction of X axis meter;
   %global gmv_tY;       %* translation in direction of Y axis meter;
   %global gmv_tZ;       %* translation in direction of Z axis meter;
@@ -335,7 +354,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_gamma radian;
   %put &=gmv_delta (dimensionless);
 
-  /* Seven parameters for the 3D similarity transformation from RD to ETRS89. The suffix inv means inverse */
+  %* Seven parameters for the 3D similarity transformation from RD to ETRS89. The suffix inv means inverse;
   %global gmv_tX_inv;       %* translation in direction of X axis meter;
   %global gmv_tY_inv;       %* translation in direction of Y axis meter;
   %global gmv_tZ_inv;       %* translation in direction of Z axis meter;
@@ -361,7 +380,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_gamma_inv radian;
   %put &=gmv_delta_inv (dimensionless);
 
-  /* Two parameters of Bessel 1841 ellipsoid in the conversion to ellipsoidal geographic pseudo Bessel coordinates */
+  %* Two parameters of Bessel 1841 ellipsoid in the conversion to ellipsoidal geographic pseudo Bessel coordinates;
   %global gmv_B1841_a;                    %* half major (equator) axis of Bessel 1841 ellipsoid in meter;
   %global gmv_B1841_f;                    %* flattening of Bessel 1841 ellipsoid (dimensionless);
   %global gmv_epsilon_B1841_threshold;    %* 𝜀 = precision threshold for termination of iteration, corresponding to 0.0001 m;
@@ -372,8 +391,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_B1841_f;
   %put &=gmv_epsilon_B1841_threshold radian; 
 
-  /* RD to ETRS9: Fixed ellipsoidal height used in the conversion to geocentric Cartesian Bessel */
-  %global gmv_RD_Bessel_h0;          %* ellipsoidal RD Bessel height approximately corresponding to 0 m in NAP (m) ;
+  %* RD to ETRS9: Fixed ellipsoidal height used in the conversion to geocentric Cartesian Bessel;
+  %global gmv_RD_Bessel_h0;          %* ellipsoidal RD Bessel height approximately corresponding to 0 m in NAP (m);
   %let gmv_RD_Bessel_h0 = 0;
   %put &=gmv_RD_Bessel_h0 meter;
 
@@ -1025,7 +1044,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     x = &pX;
     y = &pY;
 
-    /* Inverse oblique stereographic conformal projection from the RD projection plane to a sphere */
+    %* Inverse oblique stereographic conformal projection from the RD projection plane to a sphere;
     const_90_degrees = constant('pi')/2;              %* 90 degrees in radian;
     const_180_degrees = constant('pi');               %* 180 degrees in radian;
     const_360_degrees = 2*constant('pi');             %* 360 degrees in radian;
@@ -1228,7 +1247,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     phi   = &pLat; 
     labda = &pLon;
 
-    /* Convert the ellipsoidal geographic Bessel coordinates to geocentric Cartesian Bessel coordinates. */
+    %* Convert the ellipsoidal geographic Bessel coordinates to geocentric Cartesian Bessel coordinates;
     phi = phi*constant('pi')/180;               %* in radian;
     labda = labda*constant('pi')/180;
     a_b1841 = input(symget('gmv_B1841_a'),BEST32.);
@@ -1414,13 +1433,13 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %end;
 %mend RD_to_ETRS89_v1;
 
-%**********************************;
-%* END  : version 1 (ETRS89 to RD) ;
-%* BEGIN: version 2 (ETRS89 to RD) ;
-%**********************************;
+%***************************************;
+%* END  : version 1 (ETRS89 to/from RD) ;
+%* BEGIN: version 2 (ETRS89 to/from RD) ;
+%***************************************;
 
 %macro rdnaptrans2018_ini_v2;
-  /* Initializes all RDNAPTRANS2018 transformation parameters */
+  %* Initializes all RDNAPTRANS2018 transformation parameters;
   %global gmv_D_rad;          %* helper variable, degrees in radian;
   %global gmv_D_dec;          %* helper variable, degrees in decimal degrees;
   %global gmv_GRS80_a;        %* half major (equator) axis of GRS80 ellipsoid in meter;
@@ -1433,12 +1452,12 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_GRS80_f (dimensionless);
   %put &=gmv_ETRS89_h0 meter;
 
-  /* Used for inverse transformation; RD to ETRS89 */
+  %* Used for inverse transformation: RD to ETRS89;
   %global gmv_epsilon_GRS80_threshold;            %* 𝜀 = precision threshold for termination of iteration, corresponding to 0.0001 m;
   %let gmv_epsilon_GRS80_threshold = %sysevalf(0.00000000002); 
   %put &=gmv_epsilon_GRS80_threshold radian;
 
-  /* Seven parameters for the 3D similarity transformation from ETRS89 to RD. */
+  %* Seven parameters for the 3D similarity transformation from ETRS89 to RD;
   %global gmv_tX;       %* translation in direction of X axis meter;
   %global gmv_tY;       %* translation in direction of Y axis meter;
   %global gmv_tZ;       %* translation in direction of Z axis meter;
@@ -1464,7 +1483,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_gamma radian;
   %put &=gmv_delta (dimensionless);
 
-  /* Seven parameters for the 3D similarity transformation from RD to ETRS89. The suffix inv means inverse */
+  %* Seven parameters for the 3D similarity transformation from RD to ETRS89. The suffix inv means inverse;
   %global gmv_tX_inv;       %* translation in direction of X axis meter;
   %global gmv_tY_inv;       %* translation in direction of Y axis meter;
   %global gmv_tZ_inv;       %* translation in direction of Z axis meter;
@@ -1490,7 +1509,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_gamma_inv radian;
   %put &=gmv_delta_inv;
 
-  /* Two parameters of Bessel 1841 ellipsoid in the conversion to ellipsoidal geographic pseudo Bessel coordinates */
+  %* Two parameters of Bessel 1841 ellipsoid in the conversion to ellipsoidal geographic pseudo Bessel coordinates;
   %global gmv_B1841_a;                    %* half major (equator) axis of Bessel 1841 ellipsoid in meter;
   %global gmv_B1841_f;                    %* flattening of Bessel 1841 ellipsoid (dimensionless);
   %global gmv_epsilon_B1841_threshold;    %* 𝜀 = precision threshold for termination of iteration, corresponding to 0.0001 m;
@@ -1502,7 +1521,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %put &=gmv_epsilon_B1841_threshold radian; 
 
   %* RD to ETRS9: Fixed ellipsoidal height used in the conversion to geocentric Cartesian Bessel;
-  %global gmv_RD_Bessel_h0;          %* ellipsoidal RD Bessel height approximately corresponding to 0 m in NAP (m) ;
+  %global gmv_RD_Bessel_h0;          %* ellipsoidal RD Bessel height approximately corresponding to 0 m in NAP (m);
   %let gmv_RD_Bessel_h0 = 0;
   %put &=gmv_RD_Bessel_h0 meter;
 
@@ -1612,9 +1631,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
                       ,pDSout       /* The output dataset */
                       ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
   /*
-  Convert ETRS89 lat lon h coordinate pair to RD NAP x y H coordinate pair.
-  Variables are re-used. So the content of the output dataset reflects the end status of a row. Any intermediate
-  variable results are not stored. 
+  Convert ETRS89 lat lon h coordinate pair to RD NAP x y H coordinate pair. Variables are re-used. So the content of 
+  the output dataset reflects the end status of a row. Any intermediate variable results are not stored. 
   The input variable are mandatory. When no height conversion is needed, then set h to -999999.
    Input | Output
   -------+--------
@@ -1663,7 +1681,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format e_square_b1841 BEST32.;
     format i phi1 BEST32.;                          %* phi1 the new calculated one;
  
-    phi   = lat * constant('pi') / 180 ;   %* 𝜑 phi, in radian;
+    phi   = lat * constant('pi') / 180;    %* 𝜑 phi, in radian;
     labda = lon * constant('pi') / 180;    %* 𝜆 labda, in radian;
     
     /*
@@ -1729,7 +1747,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     Loop until you have reached the precision threshold. It is an UNTIL loop, thus you always enter the loop once.
     The check is done at the bottom. (In SAS syntax the check is listed at the top).
     */
-    phi1 = lat * constant('pi') / 180 ;            %* correct, it is an UNTIL loop, thus it is initialized in the loop;
+    phi1 = lat * constant('pi') / 180;             %* correct, it is an UNTIL loop, thus it is initialized in the loop;
     i = 0;                                         %* iterate counter. To check how many times you iterate;
     do until (abs(phi1-phi) lt epsilon_b1841);
       phi = phi1;
@@ -1749,7 +1767,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     else if Xgeo eq 0 and Ygeo lt 0 then labda = -1*constant('pi')/2;               %*  -90 degrees;
     else if Xgeo eq 0 and Ygeo eq 0 then labda = 0;
 
-    /* RD correction */
+    %* RD correction;
     format phi_min phi_max labda_min labda_max phi_delta labda_delta BEST32.;
     format RDcorrLat RDcorrLon BEST32.;
     format phi0  BEST32.;
@@ -1827,7 +1845,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     phi = phi1;       %* in degrees;
     labda = labda1;   %* in degrees;
 
-    /* Map projection from ellipsoid to sphere. */
+    %* Map projection from ellipsoid to sphere;
     format phi0_amf PHI_C PHI0_C labda0_amf LABDA_C LABDA0_C BEST32.;
     format k_amf x0_amf y0_amf e_b1841 BEST32.;
     format RM R_sphere BEST32.;
@@ -1896,7 +1914,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       end;
     end;
 
-    /* The height transformation. Do only height transformation if an ETRS89 height value is supplied */
+    %* The height transformation. Do only height transformation if an ETRS89 height value is supplied;
     format height BEST32.;
     format nw_height ne_height sw_height se_height BEST32.;
     format RD_H BEST32.;
@@ -1965,9 +1983,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
                       ,pDSout       /* The output dataset */
                       ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);                     
   /*
-  Convert RDNAP x y H coordinate pair to ETRS89 lat lon h coordinate pair.
-  Variables are re-used. So the content of the output dataset reflects the end status of a row. Any intermediate
-  variable results are not stored.
+  Convert RDNAP x y H coordinate pair to ETRS89 lat lon h coordinate pair.  Variables are re-used. So the content of
+  the output dataset reflects the end status of a row. Any intermediate variable results are not stored.
   The input variables are mandatory. When no height conversion is needed, then set z(H) to -999999.
    Input | Output
   -------+-------------
@@ -2008,9 +2025,10 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format epsilon_b1841 BEST32.;
     format q0 w0 q w m n BEST32.;
 
-    %* Start with inverse oblique stereographic conformal projection from the RD projection plane to a sphere;
-
-    %* Get the parameters of RD Map projection and Bessel 1841 ellipsoid parameter;
+    /*
+    Start with inverse oblique stereographic conformal projection from the RD projection plane to a sphere
+    Get the parameters of RD Map projection and Bessel 1841 ellipsoid parameter
+    */
     phi0_amf = input(symget('gmv_phi0_amersfoort'),BEST32.); 
     labda0_amf = input(symget('gmv_labda0_amersfoort'),BEST32.); 
     k_amf = input(symget('gmv_k_amersfoort'),BEST32.);
@@ -2051,7 +2069,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     else if Xnorm eq 0 and x lt x0_amf then LABDA_C = LABDA0_C - constant('pi')/2;
     else if Xnorm eq 0 and x eq x0_amf then LABDA_C = LABDA0_C;
 
-    /* Projection from sphere to ellipsoid */
+    %* Projection from sphere to ellipsoid;
     q0 = log(tan((phi0_amf + constant('pi')/2)/2)) - (e_b1841/2) * (log((1 + e_b1841*sin(phi0_amf))/(1 - e_b1841*sin(phi0_amf))));
     w0 = log(tan((PHI0_C + constant('pi')/2)/2));
     n = sqrt(1 + ((e_b1841**2*(cos(phi0_amf)**4))/(1 - e_b1841**2)));
@@ -2079,7 +2097,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     labda_n = ((LABDA_C - LABDA0_C)/n) + labda0_amf;
     labda = labda_n + 2*constant('pi')*floor((constant('pi') - labda_n)/(2*constant('pi')));     %* in radian;
 
-    /* The horizontal RD grid correction */
+    %* The horizontal RD grid correction;
     format phi_min phi_max labda_min labda_max phi_delta labda_delta BEST32.;
     format RDcorrLat RDcorrLon BEST32.;
     format phinorm labdanorm BEST32.;
@@ -2130,7 +2148,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     phi = phi + RDcorrLat;        %* in degrees;
     labda = labda + RDcorrLon;    %* in degrees;
 
-    /* Inverse datum transformation */
+    %* Inverse datum transformation;
     format h0_RD BEST32.;
     format RN Xgeo Ygeo Zgeo phi BEST32.;
     format e_square_b1841 BEST32.;
@@ -2146,7 +2164,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format e_square_grs80 BEST32.;
     format ETRS89_lat ETRS89_lon  BEST32.; 
 
-    /* Convert the ellipsoidal geographic Bessel coordinates to geocentric Cartesian Bessel coordinates. */
+    %* Convert the ellipsoidal geographic Bessel coordinates to geocentric Cartesian Bessel coordinates;
     phi = phi*constant('pi')/180;               %* in radian;
     labda = labda*constant('pi')/180;
     h0_RD = input(symget('gmv_RD_Bessel_h0'),BEST32.);
@@ -2188,7 +2206,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     Y2geo = s * (R21 * X1geo + R22 * Y1geo + R23 * Z1geo) + tY;
     Z2geo = s * (R31 * X1geo + R32 * Y1geo + R33 * Z1geo) + tZ;
 
-    /* Convert the geocentric ETR89 coordinates of the point of interest back to ellipsoidal geographic ETRS89 coordinates. */
+    %* Convert the geocentric ETR89 coordinates of the point of interest back to ellipsoidal geographic ETRS89 coordinates;
     Xgeo = X2geo;
     Ygeo = Y2geo;
     Zgeo = Z2geo;
@@ -2221,7 +2239,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     ETRS89_lat = phi1*180/constant('pi');     %* in degrees;
     ETRS89_lon = labda*180/constant('pi');    %* in degrees;
 
-    /* The height transformation. Do only height transformation if an RD height value is supplied */
+    %* The height transformation. Do only height transformation if an RD height value is supplied;
     format H height BEST32.;
     format nw_height ne_height sw_height se_height BEST32.;
     format ETRS89_h BEST32.;
@@ -2286,8 +2304,730 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %end;
 %mend RD_to_ETRS89_v2;
 
+%***************************************;
+%* END  : version 2 (ETRS89 to/from RD) ;
+%* BEGIN: version 3 (ETRS89 to/from RD) ;
+%***************************************;
+
+%macro rdnaptrans2018_ini_v3;
+  %rdnaptrans2018_ini_v2;
+%mend rdnaptrans2018_ini_v3;
+
+%macro ETRS89_to_RD_v3(pDSin        /* The dataset that contains lat, lon and h that must be transformed to RDNAP */
+                      ,pDSout       /* The output dataset */
+                      ,pLibGrid     /* The library where the grid files are stored */
+                      ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
+  /*
+  Convert ETRS89 lat lon h coordinate pair to RD NAP x y H coordinate pair. Variables are re-used. So the content of 
+  the output dataset reflects the end status of a row. Any intermediate variable results are not stored. 
+  The input variable are mandatory. When no height conversion is needed, then set h to -999999.
+   Input | Output
+  -------+--------
+    lat  |  RD_x
+    lon  |  RD_y
+      h  |  RD_H 
+  A lot of columns (more than 100) are added to the output dataset. But they can be suppresed.
+  */
+  
+  %* Add the height column, if not specified;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+    %let lmv_lib = %scan(&pDSin,1,'.');
+    %let lmv_ds = %scan(&pDSin,2,'.');
+  %end; 
+  %else %do;
+    %let lmv_lib = WORK;
+    %let lmv_ds = &pDSin;
+  %end;
+  proc sql noprint;
+    select count(*) into :lmv_height_exist from DICTIONARY.columns
+    where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
+  quit;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
+      update &pDSin set h = -999999;
+    quit;  
+  %end;
+
+  data &pDSout (drop=_i_ lat_corr lon_corr nap_height);
+    retain a_grs80 f_grs80 h0_etrs89;
+    retain alpha beta gamma delta tX tY tZ;
+    retain a_b1841 f_b1841 epsilon_b1841;
+    retain epsilon_RD phi_min phi_max labda_min labda_max phi_delta labda_delta;
+    retain phi0_amf labda0_amf k_amf x0_amf y0_amf;
+    format a_grs80 f_grs80 h0_etrs89 BEST32.;
+    format alpha beta gamma delta format tX tY tZ BEST32.;
+    format a_b1841 f_b1841 epsilon_b1841 BEST32.;
+    format epsilon_RD phi_min phi_max labda_min labda_max phi_delta labda_delta BEST32.;
+    format phi0_amf labda0_amf k_amf x0_amf y0_amf BEST32.;
+    
+    %* Initialize the arrays that contains the grid files. Always drop the variables used for that;
+    array rdcorr2018_lat_corr{1:144781}  _temporary_;
+    array rdcorr2018_lon_corr{1:144781}  _temporary_;
+    array nlgeo2018_nap_height{1:144781} _temporary_;
+    if _N_= 1 then do;
+      _i_ = 0;
+      do until (lastobs); 
+        set &pLibGrid..rdcorr2018 (keep=lat_corr lon_corr) end=lastobs;
+        set &pLibGrid..nlgeo2018 (keep=nap_height);
+        _i_=_i_+1;
+        rdcorr2018_lat_corr{_i_} = lat_corr;
+        rdcorr2018_lon_corr{_i_} = lon_corr;
+        nlgeo2018_nap_height{_i_} = nap_height;
+      end;
+      
+      %* Initialize all constant variables;
+      a_grs80 = input(symget('gmv_GRS80_a'),BEST32.);
+      f_grs80 = input(symget('gmv_GRS80_f'),BEST32.);
+      h0_etrs89 = input(symget('gmv_ETRS89_h0'),BEST32.);      
+      alpha = input(symget('gmv_alpha'),BEST32.);
+      beta  = input(symget('gmv_beta'),BEST32.);
+      gamma = input(symget('gmv_gamma'),BEST32.);
+      delta = input(symget('gmv_delta'),BEST32.);
+      tX = input(symget('gmv_tX'),BEST32.);
+      tY = input(symget('gmv_tY'),BEST32.);
+      tZ = input(symget('gmv_tZ'),BEST32.);
+      a_b1841 = input(symget('gmv_B1841_a'),BEST32.);
+      f_b1841 = input(symget('gmv_B1841_f'),BEST32.);
+      epsilon_b1841 = input(symget('gmv_epsilon_B1841_threshold'),BEST32.);
+      epsilon_RD = input(symget('gmv_epsilon_RD_threshold'),BEST32.);
+      phi_min = input(symget('gmv_phi_min'),BEST32.); 
+      phi_max = input(symget('gmv_phi_max'),BEST32.); 
+      labda_min = input(symget('gmv_labda_min'),BEST32.); 
+      labda_max = input(symget('gmv_labda_max'),BEST32.); 
+      phi_delta = input(symget('gmv_phi_delta'),BEST32.); 
+      labda_delta = input(symget('gmv_labda_delta'),BEST32.);
+      phi0_amf = input(symget('gmv_phi0_amersfoort'),BEST32.); 
+      labda0_amf = input(symget('gmv_labda0_amersfoort'),BEST32.); 
+      k_amf = input(symget('gmv_k_amersfoort'),BEST32.);
+      x0_amf = input(symget('gmv_x0_amersfoort'),BEST32.);
+      y0_amf = input(symget('gmv_y0_amersfoort'),BEST32.);
+    end;    
+ 
+    %* Do the transformation;
+    set &pDSin;
+    format phi labda h BEST32.;
+    format RN Xgeo Ygeo Zgeo BEST32.;
+    format e_square_grs80 BEST32.;
+    format X1geo Y1geo Z1geo BEST32.;
+    format s BEST32.;
+    format R11 R12 R13 R21 R22 R23 R31 R32 R33 BEST32.;
+    format X2geo Y2geo Z2geo BEST32.;
+    format e_square_b1841 BEST32.;
+    format i phi1 BEST32.;                          %* phi1 the new calculated one;
+ 
+    phi   = lat * constant('pi') / 180;    %* 𝜑 phi, in radian;
+    labda = lon * constant('pi') / 180;    %* 𝜆 labda, in radian;
+    
+    /*
+    Conversion to geocentric cartesian ETRS89 coordinates. The ellipsoidal geographic ETRS89 coordinates must be converted to 
+    geocentric Cartesian ETRS89 coordinates to be able to apply a 3D similarity transformation.
+    */
+    e_square_grs80 = f_grs80*(2-f_grs80);
+    RN = a_grs80/sqrt(1 - (e_square_grs80 * (sin(phi)**2)));
+ 
+    Xgeo = (RN + h0_etrs89) * cos(phi) * cos(labda);
+    Ygeo = (RN + h0_etrs89) * cos(phi) * sin(labda);
+    Zgeo = ((RN * (1 - e_square_grs80)) + h0_etrs89) * sin(phi);
+    
+    /*
+    Rigorous 3D similarity transformation of geocentric Cartesian coordinates.
+    The formula for a 3D similarity transformation must be applied to the geocentric Cartesian ETRS89 coordinates of the
+    point of interest. The obtained geocentric Cartesian coordinates are in the geodetic datum of RD. The geodetic datum
+    is often referred to as RD Bessel or just Bessel, even though geocentric Cartesian coordinates do not use the Bessel ellipsoid.
+    */
+    X1geo = Xgeo;
+    Y1geo = Ygeo;
+    Z1geo = Zgeo;
+
+    s = 1 + delta;
+    R11 = cos(gamma) * cos(beta);
+    R12 = cos(gamma) * sin(beta) * sin(alpha)  + sin(gamma) * cos(alpha);
+    R13 = -cos(gamma) * sin(beta) * cos(alpha) + sin(gamma) * sin(alpha);
+    R21 = -sin(gamma) * cos(beta);
+    R22 = -sin(gamma) * sin(beta) * sin(alpha) + cos(gamma) * cos(alpha);
+    R23 = sin(gamma) * sin(beta) * cos(alpha) + cos(gamma) * sin(alpha);
+    R31 = sin(beta);
+    R32 = -cos(beta) * sin(alpha);
+    R33 = cos(beta) * cos(alpha);
+
+    X2geo = s * (R11 * X1geo + R12 * Y1geo + R13 * Z1geo) + tX;
+    Y2geo = s * (R21 * X1geo + R22 * Y1geo + R23 * Z1geo) + tY;
+    Z2geo = s * (R31 * X1geo + R32 * Y1geo + R33 * Z1geo) + tZ;
+
+    /*
+    The geocentric Cartesian Bessel coordinates of the point of interest must be converted back to ellipsoidal geographic
+    The ellipsoidal geographic coordinates of a point of interest obtained by datum transformation are pseudo Bessel coordinates.
+    */
+    Xgeo = X2geo;
+    Ygeo = Y2geo;
+    Zgeo = Z2geo;
+    e_square_b1841 = f_b1841*(2-f_b1841);
+
+    /*
+    Loop until you have reached the precision threshold. It is an UNTIL loop, thus you always enter the loop once.
+    The check is done at the bottom. (In SAS syntax the check is listed at the top).
+    */
+    phi1 = lat * constant('pi') / 180;             %* correct, it is an UNTIL loop, thus it is initialized in the loop;
+    i = 0;                                         %* iterate counter. To check how many times you iterate;
+    do until (abs(phi1-phi) lt epsilon_b1841);
+      phi = phi1;
+      RN = a_b1841/sqrt(1 - (e_square_b1841 * sin(phi)**2));
+      if Xgeo > 0 then phi1 = atan((Zgeo + e_square_b1841*RN*sin(phi))/sqrt(Xgeo**2 + Ygeo**2));
+      else if round(Xgeo,0.000000000001) eq 0 and round(Ygeo,0.000000000001) eq 0 and round(Zgeo,0.000000000001) ge 0 then phi1 = constant('pi')/2;   %* +90 degrees;
+           else phi1 = -1*constant('pi')/2;                                                                                                           %* -90 degrees;
+      i + 1;
+    end;
+    phi = phi1;       %* then new phi value, in radian;
+
+    %* The phi or lat value (phi1) has been calculated. Now calculate the labda or lon value, in radian;
+    if Xgeo gt 0 then labda = atan(Ygeo/Xgeo);
+    else if Xgeo lt 0 and Ygeo ge 0 then labda = atan(Ygeo/Xgeo) + constant('pi');  %* +180 degrees;
+    else if Xgeo lt 0 and Ygeo lt 0 then labda = atan(Ygeo/Xgeo) - constant('pi');  %* -180 degrees;
+    else if Xgeo eq 0 and Ygeo gt 0 then labda = constant('pi')/2;                  %*  +90 degrees;
+    else if Xgeo eq 0 and Ygeo lt 0 then labda = -1*constant('pi')/2;               %*  -90 degrees;
+    else if Xgeo eq 0 and Ygeo eq 0 then labda = 0;
+
+    %* RD correction;
+    format RDcorrLat RDcorrLon BEST32.;
+    format phi0  BEST32.;
+    format labda0 labda1 BEST32.;
+    format phinorm labdanorm BEST32.;
+    format nlabda BEST32.;
+    format i_nw i_ne i_sw i_se 8.;
+    format nw_phi ne_phi sw_phi se_phi BEST32.;
+    format nw_labda ne_labda sw_labda se_labda BEST32.;
+
+    phi =  phi * 180 / constant('pi');       %* in degrees;
+    labda =  labda * 180 / constant('pi');   %* in degrees;
+    phi_threshold_bln = 0;                   %* loop exit criteria or the phi/latitude;
+    labda_threshold_bln = 0;                 %* loop exit criteria or the labda/longitude;
+    phi0 = phi;      %* Here you compare latitude against;
+    phi1 = phi;
+    labda0 = labda;  %* Here you compare longitude against;
+    labda1 = labda;
+
+    do until (phi_threshold_bln eq 1 and labda_threshold_bln eq 1);
+      phi = phi1;
+      labda = labda1;
+
+      phinorm = (phi-phi_min)/phi_delta;
+      labdanorm = (labda-labda_min)/labda_delta;
+      nlabda = 1 + ((labda_max-labda_min)/labda_delta);
+
+      if phi ge phi_min and phi le phi_max and labda ge labda_min and labda le labda_max then do;
+        inside_bound_correction_grid = 1;
+
+        i_nw = ceil(phinorm)*nlabda + floor(labdanorm) + 1;
+        i_ne = ceil(phinorm)*nlabda + ceil(labdanorm) + 1;
+        i_sw = floor(phinorm)*nlabda + floor(labdanorm) + 1;
+        i_se = floor(phinorm)*nlabda + ceil(labdanorm) + 1;
+
+        nw_phi = rdcorr2018_lat_corr{i_nw};
+        ne_phi = rdcorr2018_lat_corr{i_ne};
+        sw_phi = rdcorr2018_lat_corr{i_sw};
+        se_phi = rdcorr2018_lat_corr{i_se};
+        nw_labda = rdcorr2018_lon_corr{i_nw};
+        ne_labda = rdcorr2018_lon_corr{i_ne}; 
+        sw_labda = rdcorr2018_lon_corr{i_sw};
+        se_labda = rdcorr2018_lon_corr{i_se};
+      end;
+      else inside_bound_correction_grid = 0;
+
+      %* Here we calculate lat and lon correction at point of interest in real RD Bessel;
+      if phi_threshold_bln eq 0 then do;
+        if inside_bound_correction_grid eq 1 then RDcorrLat = (phinorm - floor(phinorm)) * ((nw_phi*(floor(labdanorm) + 1 - labdanorm)) + ne_phi*(labdanorm - floor(labdanorm))) + (floor(phinorm) + 1 - phinorm) * ((sw_phi*(floor(labdanorm) + 1 - labdanorm)) + se_phi*(labdanorm - floor(labdanorm)));
+        else RDcorrLat = 0;
+        phi1 = phi0 - RDcorrLat;
+        if (abs(phi1-phi) lt epsilon_RD) then do;
+          phi_threshold_bln = 1;
+        end;
+      end;
+
+      if labda_threshold_bln eq 0 then do;
+        if inside_bound_correction_grid eq 1 then RDcorrLon = (phinorm - floor(phinorm)) * ((nw_labda*(floor(labdanorm) + 1 - labdanorm)) + ne_labda*(labdanorm - floor(labdanorm))) + (floor(phinorm) + 1 - phinorm) * ((sw_labda*(floor(labdanorm) + 1 - labdanorm)) + se_labda*(labdanorm - floor(labdanorm)));
+        else RDcorrLon = 0;
+        labda1 = labda0 - RDcorrLon;
+        if (abs(labda1-labda) lt epsilon_RD) then do;
+          labda_threshold_bln = 1;
+        end;
+      end;
+    end;  %* end of do loop;
+
+    phi = phi1;       %* in degrees;
+    labda = labda1;   %* in degrees;
+
+    %* Map projection from ellipsoid to sphere;
+    format phi0_amf PHI_C PHI0_C LABDA_C LABDA0_C BEST32.;
+    format e_b1841 BEST32.;
+    format RM R_sphere BEST32.;
+    format q0 w0 q w m n BEST32.;
+    format sin_psi_2 cos_psi_2 tan_psi_2 BEST32.;
+    format sin_alpha cos_alpha r_distance BEST32.;
+    format RD_x RD_y BEST32.;                                          %* the output. the RD x y coordinates;
+
+    /*
+    Gauss conformal projection of coordinates on ellipsoid to coordinates on sphere.
+    Convert the phi/labda values back to radian.
+    */
+    phi = phi * constant('pi')/180;
+    labda = labda * constant('pi')/180;
+
+    %* Start with derived parameter calculation of the RD map projection;
+    e_b1841 =  sqrt(f_b1841*(2-f_b1841));
+    q0 = log(tan((phi0_amf + constant('pi')/2)/2)) - (e_b1841/2) * (log((1 + e_b1841*sin(phi0_amf))/(1 - e_b1841*sin(phi0_amf))));
+    RN = a_b1841 / sqrt(1 - (e_b1841**2*(sin(phi0_amf)**2)));
+    RM = (RN*(1 - e_b1841**2))/(1-(e_b1841**2*(sin(phi0_amf)**2)));
+    R_sphere = sqrt(RM*RN);
+    PHI0_C = atan((sqrt(RM)/sqrt(RN))*tan(phi0_amf)); 
+    LABDA0_C = labda0_amf;
+    w0 = log(tan((PHI0_C + constant('pi')/2)/2));
+    n = sqrt(1 + ((e_b1841**2*(cos(phi0_amf)**4))/(1 - e_b1841**2)));
+    m = w0 - n*q0;
+
+    /*
+    Gauss conformal projection of coordinates on ellipsoid to coordinates on sphere. To prevent undefined results due 
+    to taking the tangent of a number close to 90°, a tolerance should be used to test if the latitude is 90°. 
+    Rounding the ellipsoidal coordinates in advance to 0.000 000 001° or 2*10−11 rad suffices.
+    No rounding done and no 90° and -90° check. 
+    */
+    q = log(tan((phi + constant('pi')/2)/2)) - (e_b1841/2) * (log((1 + e_b1841*sin(phi))/(1 - e_b1841*sin(phi))));
+    w = n*q + m;
+    PHI_C =  2*atan(exp(w)) - constant('pi')/2;
+    LABDA_C = LABDA0_C + n*(labda - labda0_amf);
+
+    %* Projection from sphere to plane;
+    sin_psi_2 = sqrt(sin((PHI_C - PHI0_C)/2)**2 + ((sin((LABDA_C - LABDA0_C)/2)**2)*cos(PHI_C)*cos(PHI0_C)));
+    cos_psi_2 = sqrt(1 - sin_psi_2**2);
+    tan_psi_2 = sin_psi_2/cos_psi_2;
+    sin_alpha = (sin(LABDA_C - LABDA0_C)*cos(PHI_C))/(2*sin_psi_2*cos_psi_2);
+    cos_alpha = (sin(PHI_C) - sin(PHI0_C) + 2*sin(PHI0_C)*(sin_psi_2**2))/(2*cos(PHI0_C)*sin_psi_2*cos_psi_2);
+    r_distance = 2*k_amf*R_sphere*tan_psi_2;
+
+    if PHI_C eq PHI0_C and LABDA_C eq LABDA0_C then do;
+      RD_x = x0_amf;
+      RD_y = y0_amf;
+    end;
+    else do;
+      if (PHI_C ne PHI0_C or LABDA_C ne LABDA0_C) and (PHI_C ne -1*PHI0_C or LABDA_C ne constant('pi')-LABDA0_C) then do;
+        RD_x = r_distance*sin_alpha + x0_amf;
+        RD_y = r_distance*cos_alpha + y0_amf;
+      end;
+      else do;     %* undefined;
+        RD_x = 0;
+        RD_y = 0;
+      end;
+    end;
+
+    %* The height transformation. Do only height transformation if an ETRS89 height value is supplied;
+    format height BEST32.;
+    format nw_height ne_height sw_height se_height BEST32.;
+    format RD_H BEST32.;
+    format etrs89_quasi_height BEST32.;
+
+    if h ne -999999 then do;
+
+      phi = lat;     %* in degrees;
+      labda = lon;   %* in degrees;
+      height = h;
+
+      phinorm = (phi-phi_min)/phi_delta;
+      labdanorm = (labda-labda_min)/labda_delta;
+      nlabda = 1 + ((labda_max-labda_min)/labda_delta);
+
+      %* Rounding needed to pass the test validation;
+      if round(phi,0.00000001) ge phi_min and round(phi,0.00000001) le phi_max and round(labda,0.00000001) ge labda_min and round(labda,0.00000001) le labda_max then do;
+  
+        i_nw = ceil(phinorm)*nlabda + floor(labdanorm) + 1;
+        i_ne = ceil(phinorm)*nlabda + ceil(labdanorm) +  1;
+        i_sw = floor(phinorm)*nlabda + floor(labdanorm) + 1;
+        i_se = floor(phinorm)*nlabda + ceil(labdanorm) + 1;
+  
+        nw_height = nlgeo2018_nap_height{i_nw};
+        ne_height = nlgeo2018_nap_height{i_ne};
+        sw_height = nlgeo2018_nap_height{i_sw};
+        se_height = nlgeo2018_nap_height{i_se};
+  
+        etrs89_quasi_height = (phinorm - floor(phinorm)) * ((nw_height*(floor(labdanorm) + 1 - labdanorm)) + ne_height*(labdanorm - floor(labdanorm))) + (floor(phinorm) + 1 - phinorm) * ((sw_height*(floor(labdanorm) + 1 - labdanorm)) + se_height*(labdanorm - floor(labdanorm)));
+        RD_H = height - etrs89_quasi_height;
+      end;
+      else do;
+        etrs89_quasi_height = -999999;
+        RD_H = etrs89_quasi_height;
+      end;  
+    end;
+    else RD_H = -999999;
+  run;
+  
+  %* If no height in the input, then also no height in the output;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin drop h;
+      alter table &pDSout drop h, RD_H;
+    quit;  
+  %end;
+  
+  %* Keep only the transformation result. Suppress all others;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the RD transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y;
+    %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns RD_H;;
+    %put &=lmv_DSin_columns;
+    data &pDSout;
+      set &pDSout;
+      keep &lmv_DSin_columns;
+    run;
+  %end;
+%mend ETRS89_to_RD_v3;
+
+%macro RD_to_ETRS89_v3(pDSin        /* The dataset that contains x, y and z that must be transformed to ETRS89 */
+                      ,pDSout       /* The output dataset */
+                      ,pLibGrid     /* The library where the grid files are stored */                     
+                      ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);                     
+  /*
+  Convert RDNAP x y H coordinate pair to ETRS89 lat lon h coordinate pair. Variables are re-used. So the content of
+  the output dataset reflects the end status of a row. Any intermediate variable results are not stored.
+  The input variables are mandatory. When no height conversion is needed, then set z(H) to -999999.
+   Input | Output
+  -------+-------------
+     x   | ETRS89_lat
+     y   | ETRS89_lon
+     H   | ETRS89_h
+  A lot of columns (more than 100) are added to the output dataset. But they can be suppressed
+  */
+ 
+  %* Add the height column, if not specified;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+    %let lmv_lib = %scan(&pDSin,1,'.');
+    %let lmv_ds = %scan(&pDSin,2,'.');
+  %end; 
+  %else %do;
+    %let lmv_lib = WORK;
+    %let lmv_ds = &pDSin;
+  %end;
+  proc sql noprint;
+    select count(*) into :lmv_height_exist from DICTIONARY.columns
+    where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
+  quit;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin add H num format=BEST32.;        %* SAS does not support a default option;
+      update &pDSin set H = -999999;
+    quit;  
+  %end;
+ 
+  data &pDSout(drop=_i_ lat_corr lon_corr nap_height);
+    retain phi0_amf labda0_amf k_amf x0_amf y0_amf a_b1841 f_b1841 epsilon_b1841;
+    retain phi_min phi_max labda_min labda_max phi_delta labda_delta;
+    retain alpha beta gamma delta tX tY tZ;
+    retain a_grs80 f_grs80 epsilon_grs80;
+    format phi0_amf labda0_amf k_amf x0_amf y0_amf a_b1841 f_b1841 epsilon_b1841 BEST32.;
+    format phi_min phi_max labda_min labda_max phi_delta labda_delta BEST32.;
+    format alpha beta gamma delta tX tY tZ BEST32.;
+    format a_grs80 f_grs80 epsilon_grs80 BEST32.;
+    
+    %* Initialize the arrays that contains the grid files. Always drop the variables used for that;
+    array rdcorr2018_lat_corr{1:144781}  _temporary_;
+    array rdcorr2018_lon_corr{1:144781}  _temporary_;
+    array nlgeo2018_nap_height{1:144781} _temporary_;
+    if _N_= 1 then do;
+      _i_ = 0;
+      do until (lastobs); 
+        set &pLibGrid..rdcorr2018 (keep=lat_corr lon_corr) end=lastobs;
+        set &pLibGrid..nlgeo2018 (keep=nap_height);
+        _i_=_i_+1;
+        rdcorr2018_lat_corr{_i_} = lat_corr;
+        rdcorr2018_lon_corr{_i_} = lon_corr;
+        nlgeo2018_nap_height{_i_} = nap_height;
+      end;
+      
+      %* Initialize all constant variables;
+      phi0_amf = input(symget('gmv_phi0_amersfoort'),BEST32.);
+      labda0_amf = input(symget('gmv_labda0_amersfoort'),BEST32.);
+      k_amf = input(symget('gmv_k_amersfoort'),BEST32.);
+      x0_amf = input(symget('gmv_x0_amersfoort'),BEST32.);
+      y0_amf = input(symget('gmv_y0_amersfoort'),BEST32.);
+      a_b1841 = input(symget('gmv_B1841_a'),BEST32.);
+      f_b1841 = input(symget('gmv_B1841_f'),BEST32.);
+      epsilon_b1841 = input(symget('gmv_epsilon_B1841_threshold'),BEST32.);
+      phi_min = input(symget('gmv_phi_min'),BEST32.);
+      phi_max = input(symget('gmv_phi_max'),BEST32.);
+      labda_min = input(symget('gmv_labda_min'),BEST32.);
+      labda_max = input(symget('gmv_labda_max'),BEST32.);
+      phi_delta = input(symget('gmv_phi_delta'),BEST32.);
+      labda_delta = input(symget('gmv_labda_delta'),BEST32.);    
+      alpha = input(symget('gmv_alpha_inv'),BEST32.);
+      beta = input(symget('gmv_beta_inv'),BEST32.);
+      gamma = input(symget('gmv_gamma_inv'),BEST32.);
+      delta = input(symget('gmv_delta_inv'),BEST32.);
+      tX = input(symget('gmv_tX_inv'),BEST32.);
+      tY = input(symget('gmv_tY_inv'),BEST32.);
+      tZ = input(symget('gmv_tZ_inv'),BEST32.);
+      a_grs80 = input(symget('gmv_GRS80_a'),BEST32.);
+      f_grs80 = input(symget('gmv_GRS80_f'),BEST32.);
+      epsilon_grs80 = input(symget('gmv_epsilon_GRS80_threshold'),BEST32.);
+    end;    
+ 
+    %* Do the transformation;
+    set &pDSin;
+    format x y BEST32.;                                         %* the input. the RD x y coordinates;
+    format phi  PHI_C PHI0_C labda_n labda  LABDA_C LABDA0_C BEST32.;
+    format  e_b1841 BEST32.;
+    format RM RN R_sphere BEST32.;
+    format psi sin_alpha cos_alpha r_distance BEST32.;
+    format Xnorm Ynorm Znorm BEST32.;
+    format q0 w0 q w m n BEST32.;
+
+    /*
+    Start with inverse oblique stereographic conformal projection from the RD projection plane to a sphere.
+    Do the derived parameter calculation of the RD map projection
+    */
+    e_b1841 =  sqrt(f_b1841*(2-f_b1841));
+    RN = a_b1841 / sqrt(1 - (e_b1841**2*(sin(phi0_amf)**2)));
+    RM = (RN*(1 - e_b1841**2))/(1-(e_b1841**2*(sin(phi0_amf)**2)));
+    R_sphere = sqrt(RM*RN);
+    PHI0_C = atan((sqrt(RM)/sqrt(RN))*tan(phi0_amf)); 
+    LABDA0_C = labda0_amf;
+
+    %* Inverse oblique stereographic projection of coordinates on plane to coordinates on sphere;
+    r_distance = sqrt((x - x0_amf)**2 + (y - y0_amf)**2);
+    sin_alpha = (x - x0_amf)/r_distance;
+    cos_alpha = (y - y0_amf)/r_distance;
+    psi =  2 * atan(r_distance/(2*k_amf*R_sphere));
+    if x ne x0_amf or y ne y0_amf then do;
+      Xnorm = cos(PHI0_C)*cos(psi) - cos_alpha*sin(PHI0_C)*sin(psi);
+      Ynorm = sin_alpha*sin(psi);
+      Znorm = cos_alpha*cos(PHI0_C)*sin(psi) + sin(PHI0_C)*cos(psi);
+    end;
+    else do;
+      Xnorm = cos(PHI0_C);
+      Ynorm = 0;
+      Znorm = sin(PHI0_C);
+    end;
+    PHI_C = arsin(Znorm);
+    if Xnorm gt 0 then LABDA_C = LABDA0_C + atan(Ynorm/Xnorm);
+    else if Xnorm lt 0 and x ge x0_amf then LABDA_C = LABDA0_C + atan(Ynorm/Xnorm) + constant('pi');
+    else if Xnorm lt 0 and x lt x0_amf then LABDA_C = LABDA0_C + atan(Ynorm/Xnorm) - constant('pi');
+    else if Xnorm eq 0 and x gt x0_amf then LABDA_C = LABDA0_C + constant('pi')/2;
+    else if Xnorm eq 0 and x lt x0_amf then LABDA_C = LABDA0_C - constant('pi')/2;
+    else if Xnorm eq 0 and x eq x0_amf then LABDA_C = LABDA0_C;
+
+    %* Projection from sphere to ellipsoid;
+    q0 = log(tan((phi0_amf + constant('pi')/2)/2)) - (e_b1841/2) * (log((1 + e_b1841*sin(phi0_amf))/(1 - e_b1841*sin(phi0_amf))));
+    w0 = log(tan((PHI0_C + constant('pi')/2)/2));
+    n = sqrt(1 + ((e_b1841**2*(cos(phi0_amf)**4))/(1 - e_b1841**2)));
+    m = w0 - n*q0;
+
+    %* Inverse Gauss conformal projection of coordinates on sphere to coordinates on ellipsoid;
+    w = log(tan((PHI_C + constant('pi')/2)/2));
+    q = (w - m )/n;    
+ 
+    /*
+    Loop until you have reached the precision threshold. It is an UNTIL loop, thus you always enter the loop once.
+    The check is done at the bottom. (In SAS syntax the check is listed at the top).
+    */
+    phi1 = PHI_C;     %* correct, it is an UNTIL loop, thus it is initialized in the loop;
+    do until (abs(phi1-phi) lt epsilon_b1841);
+      phi = phi1;
+      if PHI_C gt -1*constant('pi')/2 and PHI_C lt constant('pi')/2 then do;
+        phi1 = 2*atan(exp(q + (e_b1841/2)*log((1 + e_b1841*sin(phi))/(1 - e_b1841*sin(phi))))) - constant('pi')/2;
+      end;
+      else phi1 = PHI_C;
+    end;
+   
+    %* The latitute has been calculated, now calculate the longitude;
+    phi = phi1;                                                                                  %* in radian;
+    labda_n = ((LABDA_C - LABDA0_C)/n) + labda0_amf;
+    labda = labda_n + 2*constant('pi')*floor((constant('pi') - labda_n)/(2*constant('pi')));     %* in radian;
+
+    %* The horizontal RD grid correction;
+    format RDcorrLat RDcorrLon BEST32.;
+    format phinorm labdanorm BEST32.;
+    format nlabda BEST32.;
+    format i_nw i_ne i_sw i_se 8.;
+    format nw_phi nw_labda BEST32.;
+    format ne_phi ne_labda BEST32.;
+    format sw_phi sw_labda BEST32.;
+    format se_phi se_labda BEST32.;
+
+    phi = phi * 180 / constant('pi');        %* in degrees;
+    labda =  labda * 180 / constant('pi');   %* in degrees;
+    phinorm = (phi-phi_min)/phi_delta;
+    labdanorm = (labda-labda_min)/labda_delta;
+    nlabda = 1 + ((labda_max-labda_min)/labda_delta);
+     
+    if phi ge phi_min and phi le phi_max and labda ge labda_min and labda le labda_max then do;
+
+      i_nw = ceil(phinorm)*nlabda + floor(labdanorm) + 1;
+      i_ne = ceil(phinorm)*nlabda + ceil(labdanorm) + 1;
+      i_sw = floor(phinorm)*nlabda + floor(labdanorm) + 1;
+      i_se = floor(phinorm)*nlabda + ceil(labdanorm) + 1;
+ 
+      nw_phi = rdcorr2018_lat_corr{i_nw};
+      ne_phi = rdcorr2018_lat_corr{i_ne};
+      sw_phi = rdcorr2018_lat_corr{i_sw};
+      se_phi = rdcorr2018_lat_corr{i_se};
+      nw_labda = rdcorr2018_lon_corr{i_nw};
+      ne_labda = rdcorr2018_lon_corr{i_ne}; 
+      sw_labda = rdcorr2018_lon_corr{i_sw};
+      se_labda = rdcorr2018_lon_corr{i_se};
+
+      RDcorrLat = (phinorm - floor(phinorm)) * ((nw_phi*(floor(labdanorm) + 1 - labdanorm)) + ne_phi*(labdanorm - floor(labdanorm))) + (floor(phinorm) + 1 - phinorm) * ((sw_phi*(floor(labdanorm) + 1 - labdanorm)) + se_phi*(labdanorm - floor(labdanorm)));
+      RDcorrLon = (phinorm - floor(phinorm)) * ((nw_labda*(floor(labdanorm) + 1 - labdanorm)) + ne_labda*(labdanorm - floor(labdanorm))) + (floor(phinorm) + 1 - phinorm) * ((sw_labda*(floor(labdanorm) + 1 - labdanorm)) + se_labda*(labdanorm - floor(labdanorm)));
+    end;
+    else do;
+      RDcorrLat = 0;
+      RDcorrLon = 0;
+    end;
+    phi = phi + RDcorrLat;        %* in degrees;
+    labda = labda + RDcorrLon;    %* in degrees;
+
+    %* Inverse datum transformation;
+    format h0_RD BEST32.;
+    format RN Xgeo Ygeo Zgeo phi BEST32.;
+    format e_square_b1841 BEST32.;
+    format X1geo Y1geo Z1geo BEST32.;
+    format s BEST32.;
+    format R11 R12 R13 R21 R22 R23 R31 R32 R33 BEST32.;
+    format X2geo Y2geo Z2geo BEST32.;
+    format e_square_grs80 BEST32.;
+    format ETRS89_lat ETRS89_lon  BEST32.; 
+
+    %* Convert the ellipsoidal geographic Bessel coordinates to geocentric Cartesian Bessel coordinates;
+    phi = phi*constant('pi')/180;               %* in radian;
+    labda = labda*constant('pi')/180;
+    h0_RD = input(symget('gmv_RD_Bessel_h0'),BEST32.);
+
+    e_square_b1841 = f_b1841*(2-f_b1841);
+    RN = a_b1841/sqrt(1 - (e_square_b1841 * (sin(phi)**2)));
+    Xgeo = (RN + h0_RD) * cos(phi) * cos(labda);
+    Ygeo = (RN + h0_RD) * cos(phi) * sin(labda);
+    Zgeo = ((RN * (1 - e_square_b1841)) + h0_RD) * sin(phi);
+
+    /*
+    Rigorous 3D similarity transformation of geocentric Cartesian coordinates. The obtained geocentric Cartesian
+    coordinates are in the geodetic datum of RD. The geodetic datum is often referred to as RD Bessel or just Bessel, 
+    even though geocentric Cartesian coordinates do not use the Bessel ellipsoid.
+    */
+    X1geo = Xgeo;
+    Y1geo = Ygeo;
+    Z1geo = Zgeo;
+    s = 1 + delta;
+    R11 = cos(gamma) * cos(beta);
+    R12 = cos(gamma) * sin(beta) * sin(alpha)  + sin(gamma) * cos(alpha);
+    R13 = -cos(gamma) * sin(beta) * cos(alpha) + sin(gamma) * sin(alpha);
+    R21 = -sin(gamma) * cos(beta);
+    R22 = -sin(gamma) * sin(beta) * sin(alpha) + cos(gamma) * cos(alpha);
+    R23 = sin(gamma) * sin(beta) * cos(alpha) + cos(gamma) * sin(alpha);
+    R31 = sin(beta);
+    R32 = -cos(beta) * sin(alpha);
+    R33 = cos(beta) * cos(alpha);
+
+    X2geo = s * (R11 * X1geo + R12 * Y1geo + R13 * Z1geo) + tX;
+    Y2geo = s * (R21 * X1geo + R22 * Y1geo + R23 * Z1geo) + tY;
+    Z2geo = s * (R31 * X1geo + R32 * Y1geo + R33 * Z1geo) + tZ;
+
+    %* Convert the geocentric ETR89 coordinates of the point of interest back to ellipsoidal geographic ETRS89 coordinates;
+    Xgeo = X2geo;
+    Ygeo = Y2geo;
+    Zgeo = Z2geo;
+    e_square_grs80 = f_grs80*(2-f_grs80);
+
+    /*
+    Loop until you have reached the precision threshold. It is an UNTIL loop, thus you always enter the loop once.
+    The check is done at the bottom. (In SAS syntax the check is listed at the top).
+    */
+    phi1 = PHI_C;  %* correct, it is an UNTIL loop, thus it is initialized in the loop;
+    do until (abs(phi1-phi) lt epsilon_grs80);
+      phi = phi1;
+      RN = a_grs80/sqrt(1 - (e_square_grs80 * sin(phi)**2));
+      if Xgeo > 0 then phi1 = atan((Zgeo + e_square_grs80*RN*sin(phi))/sqrt(Xgeo**2 + Ygeo**2));
+      else if round(Xgeo,0.000000000001) eq 0 and round(Ygeo,0.000000000001) eq 0 and round(Zgeo,0.000000000001) ge 0 then phi1 = constant('pi')/2;   %* +90 degrees;
+           else phi1 = -1*constant('pi')/2;                                                                                                           %* -90 degrees;
+    end;
+
+    %* The phi or lat value (phi1) has been calculated. Now calculate the labda or lon value;
+    if Xgeo gt 0 then labda = atan(Ygeo/Xgeo);
+    else if Xgeo lt 0 and Ygeo ge 0 then labda = atan(Ygeo/Xgeo) + constant('pi');  %* +180 degrees;
+    else if Xgeo lt 0 and Ygeo lt 0 then labda = atan(Ygeo/Xgeo) - constant('pi');  %* -180 degrees;
+    else if Xgeo eq 0 and Ygeo gt 0 then labda = constant('pi')/2;                  %*  +90 degrees;
+    else if Xgeo eq 0 and Ygeo lt 0 then labda = -1*constant('pi')/2;               %*  -90 degrees;
+    else if Xgeo eq 0 and Ygeo eq 0 then labda = 0;
+
+    ETRS89_lat = phi1*180/constant('pi');     %* in degrees;
+    ETRS89_lon = labda*180/constant('pi');    %* in degrees;
+
+    %* The height transformation. Do only height transformation if an RD height value is supplied;
+    format H height BEST32.;
+    format nw_height ne_height sw_height se_height BEST32.;
+    format ETRS89_h BEST32.;
+    format etrs89_quasi_height BEST32.;
+
+    if H ne -999999 then do;
+
+      phi = ETRS89_lat;     %* in degrees;
+      labda = ETRS89_lon;   %* in degrees;
+      height = H;
+
+      phinorm = (phi-phi_min)/phi_delta;
+      labdanorm = (labda-labda_min)/labda_delta;
+      nlabda = 1 + ((labda_max-labda_min)/labda_delta);
+
+      %* Rounding needed to pass the test validation;
+      if round(phi,0.00000001) ge phi_min and round(phi,0.00000001) le phi_max and round(labda,0.00000001) ge labda_min and round(labda,0.00000001) le labda_max then do;
+  
+        i_nw = ceil(phinorm)*nlabda + floor(labdanorm) + 1;
+        i_ne = ceil(phinorm)*nlabda + ceil(labdanorm) +  1;
+        i_sw = floor(phinorm)*nlabda + floor(labdanorm) + 1;
+        i_se = floor(phinorm)*nlabda + ceil(labdanorm) + 1;
+  
+        nw_height = nlgeo2018_nap_height{i_nw};
+        ne_height = nlgeo2018_nap_height{i_ne};
+        sw_height = nlgeo2018_nap_height{i_sw};
+        se_height = nlgeo2018_nap_height{i_se};
+  
+        etrs89_quasi_height = (phinorm - floor(phinorm)) * ((nw_height*(floor(labdanorm) + 1 - labdanorm)) + ne_height*(labdanorm - floor(labdanorm))) + (floor(phinorm) + 1 - phinorm) * ((sw_height*(floor(labdanorm) + 1 - labdanorm)) + se_height*(labdanorm - floor(labdanorm)));
+        ETRS89_h = height + etrs89_quasi_height;
+      end;
+      else do;
+        etrs89_quasi_height = -999999;
+        ETRS89_h = etrs89_quasi_height;
+      end;  
+    end;
+    else ETRS89_h = -999999;
+  run;
+  
+  %* If no height in the input, then also no height in the output;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin drop H;
+      alter table &pDSout drop H, ETRS89_h;
+    quit;  
+  %end;
+  
+  %* Keep only the transformation result. Suppress all others;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;
+    %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
+    %put &=lmv_DSin_columns;
+    data &pDSout;
+      set &pDSout;
+      keep &lmv_DSin_columns;
+    run;
+  %end;
+%mend RD_to_ETRS89_v3;
+
 %***************************************************************************;
-%* END  : version 2 (ETRS89 to RD)                                          ;
+%* END  : version 3 (ETRS89 to/from RD)                                     ;
 %* BEGIN: Import the grid text files and validation and certification files ;
 %***************************************************************************;
 
@@ -2395,7 +3135,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
 
 %***************************************************************************;
 %* END  : Import the grid text files and validation and certification files ;
-%* BEGIN: Self-validation (v1 and v2)                                       ;
+%* BEGIN: Self-validation (v1, v2 and v3)                                   ;
 %***************************************************************************;
 
 %macro self_validation_ETRS89_v1(pLib  /* the library where the self-validation dataset is stored */);
@@ -2603,7 +3343,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   proc sql;
     title1 '10000 points are transformed. This is what you should get:';
     title2 '   max_dx    max_dy    max_dz     dx     dy    dxdy   dz';
-    title3 ' 0.000338  0.000757  0.000051  10000  10000  10000  10000';
+    title3 ' 0.000338  0.000758  0.000051  10000  10000  10000  10000';
     select max(dx) as max_dx, max(dy) as max_dy, max(dz) as max_dh,
     (select sum(conv_x_ok) from &pLib..SELF_ETRS89_V2) as dx,
     (select sum(conv_y_ok) from &pLib..SELF_ETRS89_V2) as dy,
@@ -2667,10 +3407,107 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   quit;
 %mend self_validation_RD_v2;
 
-%************************************************;
-%* END  : Self-validation (v1 and v2)            ;
-%* BEGIN: Certification validation (v1 and v2)   ;
-%************************************************;
+%macro self_validation_ETRS89_v3(pLib  /* the library where the self-validation dataset is stored */);
+  /*
+  ETRS89 to RD selfvalidation. 100% score needed.
+  The self-validation dataset is called: Z001_ETRS89andRDNAP
+  The return dataset is called         : SELF_ETRS89_V3
+  
+  Next shows what you should get as output:
+   max_dx    max_dy    max_dz     dx     dy    dxdy   dz
+  0.000338  0.000758  0.000051  10000  10000  10000  10000
+  */
+  
+  %rdnaptrans2018_ini_v3
+  %ETRS89_to_RD_v3(&pLib..Z001_ETRS89ANDRDNAP, SELF_ETRS89_V3, &pLib) 
+
+  %* 100% score is achieved when all three coordinates are smaller then 1mm;
+  data &pLib..SELF_ETRS89_V3;
+    set SELF_ETRS89_V3 (keep=ptr lat lon h x y z RD_x RD_y RD_h);
+    format dx dy dz BEST32.;
+    dx = abs(x-RD_x);
+    dy = abs(y-RD_y);
+    dz = abs(z-RD_h);
+    if dx lt 0.001 then conv_x_ok = 1;
+      else conv_x_ok = 0;
+    if dy lt 0.001 then conv_y_ok = 1;
+      else conv_y_ok = 0;
+    if conv_x_ok eq 1 and conv_y_ok eq 1 then conv_x_y_ok = 1;
+      else conv_x_y_ok = 0;
+    if dz lt 0.001 then conv_z_ok = 1;
+      else conv_z_ok = 0;
+  run;
+
+  %* Display the results;
+  proc sql;
+    title1 '10000 points are transformed. This is what you should get:';
+    title2 '   max_dx    max_dy    max_dz     dx     dy    dxdy   dz';
+    title3 ' 0.000338  0.000758  0.000051  10000  10000  10000  10000';
+    select max(dx) as max_dx, max(dy) as max_dy, max(dz) as max_dh,
+    (select sum(conv_x_ok) from &pLib..SELF_ETRS89_V3) as dx,
+    (select sum(conv_y_ok) from &pLib..SELF_ETRS89_V3) as dy,
+    (select sum(conv_x_y_ok) from &pLib..SELF_ETRS89_V3) as dxdy,
+    (select sum(conv_z_ok) from &pLib..SELF_ETRS89_V3) as dz
+    from &pLib..SELF_ETRS89_V3;
+    title;
+  quit;
+%mend self_validation_ETRS89_v3;
+
+%macro self_validation_RD_v3(pLib  /* the library where the self-validation dataset is stored */);
+  /*
+  RD to ETRS89 selfvalidation. You will not get a 100% score. You should get 97.61% score as minimum
+  The self-validation dataset is called: Z001_ETRS89andRDNAP
+  The return dataset is called         : SELF_RDNAP_V1
+  
+  Next shows what you should get as output:
+  max_dlat  max_dlon   max_dh   dlat  dlon  dlatdlon   dh
+  3.534E-8  4.247E-8  0.000051  9774  9857    9761    10000
+  */
+
+  %rdnaptrans2018_ini_v3
+  data Z001_ETRS89ANDRDNAP(rename=(z=H));
+    set &pLib..Z001_ETRS89ANDRDNAP(rename=(h=etrs_h));
+  run; 
+  %RD_to_ETRS89_v3(Z001_ETRS89ANDRDNAP, SELF_RDNAP_V3, &pLib)
+
+  %* 100% score is achieved when all three coordinates are smaller then 0.00000001 meter. That is not gonna happen here;
+  data &pLib..SELF_RDNAP_V3;
+    set SELF_RDNAP_V3 (keep=ptr lat lon etrs_h x y H ETRS89_lat ETRS89_lon ETRS89_h);
+    format dlat dlon dh BEST32.;
+    dlat = abs(lat - ETRS89_lat);
+    dlon = abs(lon - ETRS89_lon);
+    dh = abs(etrs_h - ETRS89_h);
+    if dlat lt 0.00000001 then lat_conv_ok = 1;
+      else lat_conv_ok = 0;
+    if dlon lt 0.00000001 then lon_conv_ok = 1;
+      else lon_conv_ok = 0;
+    if lat_conv_ok eq 1 and lon_conv_ok eq 1 then lat_lon_conv_ok = 1;
+      else lat_lon_conv_ok = 0;
+    if ETRS89_h eq -999999 then h_conv_ok = 1;
+    else if dh lt 0.001 then h_conv_ok = 1;
+         else h_conv_ok = 0;
+  run;
+  
+  %* Display the results;
+  proc sql;
+    title1 '10000 points are transformed. This is what you should get:';
+    title2 'max_dlat  max_dlon   max_dh   dlat  dlon  dlatdlon   dh';
+    title3 '3.534E-8  4.247E-8  0.000051  9774  9857    9761    10000';
+    select max(dlat) as max_dlat, max(dlon) as max_dlon,
+    (select max(dh) from &pLib..SELF_RDNAP_V3 where h_conv_ok eq 1 and ETRS89_h ne -999999) as max_dh,
+    (select sum(lat_conv_ok) from &pLib..SELF_RDNAP_V3) as dlat,
+    (select sum(lon_conv_ok) from &pLib..SELF_RDNAP_V3) as dlon,
+    (select sum(lat_lon_conv_ok) from &pLib..SELF_RDNAP_V3) as dlatdlon,
+    (select sum(h_conv_ok) from &pLib..SELF_RDNAP_V3) as dh
+    from &pLib..SELF_RDNAP_V3;
+    title;
+  quit;
+%mend self_validation_RD_v3;
+
+%**************************************************;
+%* END  : Self-validation (v1, v2 and v3)          ;
+%* BEGIN: Certification validation (v1, v2 and v3) ;
+%**************************************************;
 
 %macro certify_validation_ETRS89_v1(pLib        /* the library where the ETRS certification dataset is stored */
                                    ,pOutputFile /* the output file */);
@@ -2694,8 +3531,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   proc sql noprint;
     create table CERTIFY_ETRS89_V1 as select * from &pLib..Z002_ETRS89;
     alter table CERTIFY_ETRS89_V1 add x_coordinate num format=BEST32.
-                                         ,y_coordinate num format=BEST32.
-                                         ,rd_height num format=BEST32.;
+                                     ,y_coordinate num format=BEST32.
+                                     ,rd_height num format=BEST32.;
   quit;
   %do lc=1 %to 10000;
     data _null_;
@@ -2866,16 +3703,75 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     else put 'NaN' @;
     put '0D'x;
   run;
- %mend certify_validation_RD_v2;
+%mend certify_validation_RD_v2;
 
-%*************************************************;
-%* END  : Certification validation (v1 and v2)    ;
-%* BEGIN: ETRS89 to ITRS transformation Version 1 ;
-%*************************************************;
+%macro certify_validation_ETRS89_v3(pLib        /* the library where the ETRS89 certification dataset is stored */
+                                   ,pOutputFile /* the output file */);
+  /*
+  ETRS89 to RD certification. 100% score needed.
+  The certification  dataset is called : Z002_ETRS89
+  The return dataset is called         : CERTIFY_ETRS89_V3
+  The output file must then be fed into the certification validation service.
+  */
+  %rdnaptrans2018_ini_v3
+  data Z002_ETRS89;
+    set &pLib..Z002_ETRS89 (drop=i);
+    rename latitude=lat longitude=lon height=h;
+  run;
+  %ETRS89_to_RD_v3(Z002_ETRS89, CERTIFY_ETRS89_V3, &pLib)
+  data &pLib..CERTIFY_ETRS89_V3;
+    set CERTIFY_ETRS89_V3 (keep=point_id RD_x RD_y RD_h);
+  run;
+  
+  filename reffile disk "&pOutputFile";
+  data _null_;
+    set &pLib..CERTIFY_ETRS89_V3;
+    file reffile DLM=' ';
+    format point_id 8. RD_x RD_y RD_h BEST32.;
+    put point_id RD_x RD_y @;
+    if RD_h ne -999999 then put RD_h @;
+    else put 'NaN' @;
+    put '0D'x;
+  run;
+%mend certify_validation_ETRS89_v3;
+
+%macro certify_validation_RD_v3(pLib        /* the library where the RD certification dataset is stored */
+                               ,pOutputFile /* the output file */);
+  /*
+  RD to ETRS89 to certification. 100% score needed.
+  The certification  dataset is called : Z002_RDNAP
+  The return dataset is called         : CERTIFY_RDNAP_V3
+  The output file must then be fed into the certification validation service.
+  */
+  %rdnaptrans2018_ini_v3
+  data Z002_RDNAP;
+    set &pLib..Z002_RDNAP (drop=i);
+    rename x_coordinate=x y_coordinate=y height=H;
+  run;
+  %RD_to_ETRS89_V3(Z002_RDNAP, CERTIFY_RDNAP_V3, &pLib)
+  data &pLib..CERTIFY_RDNAP_V3;
+    set CERTIFY_RDNAP_V3 (keep=point_id ETRS89_lat ETRS89_lon ETRS89_h);
+  run;
+  
+  filename reffile disk "&pOutputFile";
+  data _null_;
+    set &pLib..CERTIFY_RDNAP_V3;
+    file reffile DLM=' ';
+    format point_id 8. ETRS89_lat ETRS89_lon ETRS89_h BEST32.;
+    put point_id ETRS89_lat ETRS89_lon @;
+    if ETRS89_h ne -999999 then put ETRS89_h @;
+    else put 'NaN' @;
+    put '0D'x;
+  run;
+ %mend certify_validation_RD_v3;
+
+%**************************************************;
+%* END  : Certification validation (v1, v2 and v3) ;
+%* BEGIN: ETRS89 to/from ITRS transformation (v1)  ;
+%**************************************************;
 
 %macro etrs_itrs_ini_v1(pItrf=ITRF2014 /* The ITRF realisation you use; ITRF2008 or ITRF2014 */);
-  /* Initializes all ITRS transformation parameters and global macro variables */
-
+  %* Initializes all ITRS transformation parameters and global macro variables;
   %global gmv_ETRS89_lat_dgr;            %* the lat/lon pair in minutes, second degrees: ellipsoidal geographic ETRS89 coordinates;
   %global gmv_ETRS89_lon_dgr;
   %global gmv_ETRS89_lat_dec;            %* the lat/lon pair in decimal degrees: ellipsoidal geographic ETRS89 coordinates;
@@ -2915,7 +3811,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %global gmv_itrs_alpha;    %* rotation angle around X axis: 𝛼 =+0.00825∙10−6 rad=+0.001701″;
   %global gmv_itrs_beta;     %* rotation angle around Y axis: 𝛽 =+0.04989∙10−6 rad=+0.010290″;
   %global gmv_itrs_gamma;    %* rotation angle around Z axis: 𝛾 =−0.08063∙10−6 rad=−0.016632″;
-  %global gmv_itrs_delta;    %* scale difference (dimensionless): 𝛿 =+0.00212∙10−6 ;
+  %global gmv_itrs_delta;    %* scale difference (dimensionless): 𝛿 =+0.00212∙10−6;
 
   %global gmv_rate_tX;       %* yearly rate of translation in direction of X axis: 𝑡̇𝑋 =+0.00010 m;
   %global gmv_rate_tY;       %* yearly rate of translation in direction of Y axis: 𝑡̇𝑌 =+0.00010 m;
@@ -3203,12 +4099,12 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
 %mend lm_WGS84_to_ETRS89_v1;
 
 %*************************************************;
-%* END  : ETRS89 to ITRS transformation Version 1 ;
-%* BEGIN: ETRS89 to ITRS transformation Version 2 ;
+%* END  : ETRS89 to/from ITRS transformation (v1) ;
+%* BEGIN: ETRS89 to/from ITRS transformation (v2) ;
 %*************************************************;
 
 %macro etrs_itrs_ini_v2(pItrf=ITRF2014 /* The ITRF realisation you use; ITRF2008 or ITRF2014 */);
-  /* Initializes all ITRS transformation parameters and global macro variables. */
+  %* Initializes all ITRS transformation parameters and global macro variables;
   %global gmv_D_dec;                     %* helper: degree in decimal notation;
   %global gmv_D_rad;                     %* helper: degree in radian;
  
@@ -3230,7 +4126,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %global gmv_itrs_alpha;    %* rotation angle around X axis: 𝛼 =+0.00825∙10−6 rad=+0.001701″;
   %global gmv_itrs_beta;     %* rotation angle around Y axis: 𝛽 =+0.04989∙10−6 rad=+0.010290″;
   %global gmv_itrs_gamma;    %* rotation angle around Z axis: 𝛾 =−0.08063∙10−6 rad=−0.016632″;
-  %global gmv_itrs_delta;    %* scale difference (dimensionless): 𝛿 =+0.00212∙10−6 ;
+  %global gmv_itrs_delta;    %* scale difference (dimensionless): 𝛿 =+0.00212∙10−6;
 
   %global gmv_rate_tX;       %* yearly rate of translation in direction of X axis: 𝑡̇𝑋 =+0.00010 m;
   %global gmv_rate_tY;       %* yearly rate of translation in direction of Y axis: 𝑡̇𝑌 =+0.00010 m;
@@ -3372,7 +4268,6 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     format a_grs80 f_grs80 e_square_grs80 epsilon BEST32.;
     format phi phi1 labda h i BEST32.;
     format RN X Y Z BEST32.;
-
     format X1 Y1 Z1 BEST32.;
     format alpha beta gamma delta BEST32.;
     format tX tY tZ BEST32.;
@@ -3642,13 +4537,367 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   quit;
 %mend WGS84_pseudo_validatation_v2;
 
-%**************************************************;
-%* END  : ETRS89 to ITRS transformation Version 2  ;
-%* BEGIN: Miscellaneous macros                     ;
-%**************************************************;
+%*************************************************;
+%* END  : ETRS89 to/from ITRS transformation (v2) ;
+%* BEGIN: ETRS89 to/from ITRS transformation (v3) ;
+%*************************************************;
+
+%macro etrs_itrs_ini_v3 (pItrf=ITRF2014 /* The ITRF realisation you use; ITRF2008 or ITRF2014 */);
+  %etrs_itrs_ini_v2(pItrf=&pItrf)
+%mend etrs_itrs_ini_v3;
+
+%macro WGS84_to_ETRS89_v3(pDSin        /* The input data set. Must contain variables lat lon and h in decimal degrees */
+                         ,pDSout       /* The output data set */
+                         ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
+  %lm_WGS84_to_ETRS89_v3(&pDSin, &pDSout, 1, &pSuppress)                            
+%mend WGS84_to_ETRS89_v3;
+
+%macro ETRS89_to_WGS84_v3(pDSin        /* The input data set. Must contain variables lat lon and h in decimal degrees */
+                         ,pDSout       /* The output data set */
+                         ,pSuppress=1  /* Suppress all intermediate columns in the output: 1=Yes, 0=No */); 
+  %lm_WGS84_to_ETRS89_v3(&pDSin, &pDSout, -1, &pSuppress)                            
+%mend ETRS89_to_WGS84_v3;
+
+%macro lm_WGS84_to_ETRS89_v3(pDSin        /* The input data set. Must contain variables lat lon and h in decimal degrees */
+                            ,pDSout       /* The output data set */
+                            ,pDirection   /* The transformation direction, 1 (WGS84 to ETRS89) or -1 (ETRS89 to WGS84 */
+                            ,pSuppress    /* Suppress all intermediate columns in the output: 1=Yes, 0=No */);
+  /*
+  Transform WGS84 to ETRS89 or ETRS89 to WGS84, depending the direction.
+  Input | Output (1)      Output (-1)
+  ------+----------------------------
+   lat  | ETRS89_lat     WGS84_lat   
+   lon  | ETRS89_lon     WGS84_lon
+     h  | ETRS89_h       WGS84_h
+  A height value is mandatory. Set to zero when there is no height.
+  */
+ 
+  %* Add the height column, if not specified;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+    %let lmv_lib = %scan(&pDSin,1,'.');
+    %let lmv_ds = %scan(&pDSin,2,'.');
+  %end; 
+  %else %do;
+    %let lmv_lib = WORK;
+    %let lmv_ds = &pDSin;
+  %end;
+  proc sql noprint;
+    select count(*) into :lmv_height_exist from DICTIONARY.columns
+    where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
+  quit;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
+      update &pDSin set h = 0;
+    quit;  
+  %end;
+ 
+  data &pDSout (drop=itrs_alpha itrs_beta itrs_gamma itrs_delta itrs_tX itrs_tY itrs_tZ rate_alpha rate_beta rate_gamma rate_delta rate_tX rate_tY rate_tZ itrs_ref_epoch);
+    retain GRS80_a GRS80_f itrs_alpha itrs_beta itrs_gamma itrs_delta itrs_tX itrs_tY itrs_tZ rate_alpha rate_beta rate_gamma rate_delta rate_tX rate_tY rate_tZ itrs_ref_epoch epsilon_itrs_threshold;
+    format GRS80_a GRS80_f itrs_alpha itrs_beta itrs_gamma itrs_delta itrs_tX itrs_tY itrs_tZ rate_alpha rate_beta rate_gamma rate_delta rate_tX rate_tY rate_tZ itrs_ref_epoch epsilon_itrs_threshold BEST32.;    
+    %* Initialize the constants;
+    if _N_ eq 1 then do;
+      GRS80_a = input(symget('gmv_GRS80_a'),BEST32.);
+      GRS80_f = input(symget('gmv_GRS80_f'),BEST32.);
+      itrs_alpha = input(symget('gmv_itrs_alpha'),BEST32.);
+      itrs_beta  =  input(symget('gmv_itrs_beta'),BEST32.);
+      itrs_gamma = input(symget('gmv_itrs_gamma'),BEST32.);
+      itrs_delta = input(symget('gmv_itrs_delta'),BEST32.);
+      itrs_tX = input(symget('gmv_itrs_tX'),BEST32.);
+      itrs_tY = input(symget('gmv_itrs_tY'),BEST32.);
+      itrs_tZ = input(symget('gmv_itrs_tZ'),BEST32.);
+      rate_alpha = input(symget('gmv_rate_alpha'),BEST32.);
+      rate_beta  = input(symget('gmv_rate_beta'),BEST32.);
+      rate_gamma = input(symget('gmv_rate_gamma'),BEST32.);
+      rate_delta = input(symget('gmv_rate_delta'),BEST32.);
+      rate_tX = input(symget('gmv_rate_tX'),BEST32.);
+      rate_tY = input(symget('gmv_rate_tY'),BEST32.);
+      rate_tZ =  input(symget('gmv_rate_tZ'),BEST32.);
+      itrs_ref_epoch = input(symget('gmv_itrs_ref_epoch'),BEST32.);
+      epsilon_itrs_threshold= input(symget('gmv_epsilon_itrs_threshold'),BEST32.);
+    end;
+
+    set &pDSin;
+    format a_grs80 f_grs80 e_square_grs80 epsilon BEST32.;
+    format phi phi1 labda h i BEST32.;
+    format RN X Y Z BEST32.;
+    format X1 Y1 Z1 BEST32.;
+    format alpha beta gamma delta BEST32.;
+    format tX tY tZ BEST32.;
+    format r_alpha r_beta r_gamma r_delta BEST32.;
+    format r_tX r_tY r_tZ BEST32.;
+    format s BEST32.;
+    format R11 R12 R13 R21 R22 R23 R31 R32 R33 BEST32.;
+    format X2 Y2 Z2 BEST32.;
+    format t_epoch t BEST32.;
+    format tr_way 8.;
+    format tr_lat tr_lon tr_h BEST32.;                          %* the transformation values, output, later on renamed;
+    
+    phi   = lat;     %* 𝜑 phi, in decimal degrees;
+    labda = lon;     %* 𝜆 labda, in decimal degrees;
+    tr_way = &pDirection;                                %* transformation directon or transformation way;
+    phi1 = phi;                                          %* needed for the loop at the end of this macro;
+        
+    phi = phi * constant('pi')/180;                      %* in radian;
+    labda = labda * constant('pi')/180;
+    
+    /*
+    Conversion to geocentric cartesian coordinates. The ellipsoidal geographic coordinates must be converted to 
+    geocentric Cartesian coordinates to be able to apply a 3D similarity transformation.
+    */
+    a_grs80 = GRS80_a;
+    f_grs80 = GRS80_f;
+
+    e_square_grs80 = f_grs80*(2-f_grs80);
+    RN = a_grs80/sqrt(1 - (e_square_grs80 * (sin(phi)**2)));
+ 
+    X = (RN + h) * cos(phi) * cos(labda);
+    Y = (RN + h) * cos(phi) * sin(labda);
+    Z = ((RN * (1 - e_square_grs80)) + h) * sin(phi);
+    
+    /* Rigorous 3D similarity transformation of geocentric Cartesian coordinates. */
+    X1 = X;
+    Y1 = Y;
+    Z1 = Z;
+    alpha = tr_way * itrs_alpha;
+    beta  = tr_way * itrs_beta;
+    gamma =  tr_way * itrs_gamma;
+    delta =  tr_way * itrs_delta;
+    tX = tr_way * itrs_tX;
+    tY =  tr_way * itrs_tY;
+    tZ =  tr_way * itrs_tZ;
+    
+    r_alpha = tr_way * rate_alpha;
+    r_beta  = tr_way * rate_beta;
+    r_gamma =  tr_way * rate_gamma;
+    r_delta =  tr_way * rate_delta;
+    r_tX = tr_way * rate_tX;
+    r_tY =  tr_way * rate_tY;
+    r_tZ =  tr_way * rate_tZ;
+
+    %* Adjust the parameters based on current date and reference epoch;
+    t_epoch = itrs_ref_epoch;
+    
+    /* 
+    For the test point
+    d = mdy(10, 1, 2020);
+    t = year(d) + (d - mdy(1,1,year(d)))/365;
+    */
+    t = year(today()) + (today() - mdy(1,1,year(today())))/365;
+
+    alpha = alpha + r_alpha * (t - t_epoch);
+    beta = beta + r_beta * (t - t_epoch);
+    gamma = gamma + r_gamma * (t - t_epoch);
+    delta = delta + r_delta * (t - t_epoch);
+    tX = tX + r_tX * (t - t_epoch);
+    tY = tY + r_tY * (t - t_epoch);
+    tZ = tZ + r_tZ * (t - t_epoch);
+    
+    s = 1 + delta;
+    R11 = cos(gamma) * cos(beta);
+    R12 = cos(gamma) * sin(beta) * sin(alpha)  + sin(gamma) * cos(alpha);
+    R13 = -cos(gamma) * sin(beta) * cos(alpha) + sin(gamma) * sin(alpha);
+    R21 = -sin(gamma) * cos(beta);
+    R22 = -sin(gamma) * sin(beta) * sin(alpha) + cos(gamma) * cos(alpha);
+    R23 = sin(gamma) * sin(beta) * cos(alpha) + cos(gamma) * sin(alpha);
+    R31 = sin(beta);
+    R32 = -cos(beta) * sin(alpha);
+    R33 = cos(beta) * cos(alpha);
+
+    X2 = s * (R11 * X1 + R12 * Y1 + R13 * Z1) + tX;
+    Y2 = s * (R21 * X1 + R22 * Y1 + R23 * Z1) + tY;
+    Z2 = s * (R31 * X1 + R32 * Y1 + R33 * Z1) + tZ;
+
+    /* The geocentric Cartesian coordinates of the point of interest must be converted back to ellipsoidal geographic coordinates. */
+    X = X2;
+    Y = Y2;
+    Z = Z2;
+    epsilon = epsilon_itrs_threshold;
+    
+    /*
+    Loop until you have reached the precision threshold. It is an UNTIL loop, thus you always enter the loop once.
+    The check is done at the bottom. (In SAS syntax the check is listed at the top).
+    phi1 is set at the top of this macro. You may also set phi1 = 0.
+    */
+    i = 0;                                         %* iterate counter. To check how many times you iterate;
+    do until (abs(phi1-phi) lt epsilon);
+      phi = phi1;                                  %* correct, it is an UNTIL loop, thus it is initialized in the loop;
+      RN = a_grs80/sqrt(1 - (e_square_grs80 * sin(phi)**2));
+      if X > 0 then phi1 = atan((Z + e_square_grs80*RN*sin(phi))/sqrt(X**2 + Y**2));
+      else if round(X,0.000000000001) eq 0 and round(Y,0.000000000001) eq 0 and round(Z,0.000000000001) ge 0 then phi1 = constant('pi')/2;   %* +90 degrees;
+           else phi1 = -1*constant('pi')/2;                                                                                                  %* -90 degrees;
+      i + 1;
+    end;
+   
+    %* The phi or lat value (phi1) has been calculated. Now calculate the labda or lon value;
+    phi = phi1;
+    if X gt 0 then labda = atan(Y/X);
+    else if X lt 0 and Y ge 0 then labda = atan(Y/X) + constant('pi');  %* +180 degrees;
+    else if X lt 0 and Y lt 0 then labda = atan(Y/X) - constant('pi');  %* -180 degrees;
+    else if X eq 0 and Y gt 0 then labda = constant('pi')/2;            %*  +90 degrees;
+    else if X eq 0 and Y lt 0 then labda = -1*constant('pi')/2;         %*  -90 degrees;
+    else if X eq 0 and Y eq 0 then labda = 0;
+
+    %* Rounding height to four decimals, and phi (lat) and labda (lon) to 9 decimals is sufficient accurate;
+    tr_h = round(sqrt(X**2 + Y**2) * cos(phi) + Z * sin(phi) - a_grs80 * sqrt(1 - e_square_grs80*(sin(phi)**2)),0.00000001);
+    tr_lat = round(phi * 180 /constant('pi'),0.000000000001);
+    tr_lon = round(labda * 180 /constant('pi'),0.000000000001);
+  run;
+  
+  %* Rename the transformation fields;
+  %if %sysfunc(findc(&pDSout,'.')) ne 0 %then %do;
+    %let lmv_lib_out = %scan(&pDSout,1,'.');
+    %let lmv_ds_out = %scan(&pDSout,2,'.');
+  %end;
+  %else %do;
+    %let lmv_lib_out = WORK;
+    %let lmv_ds_out = &pDSout;
+  %end;  
+  proc datasets library=&lmv_lib_out nolist; 
+    modify &lmv_ds_out;
+    %if &pDirection eq 1 %then %do;
+      rename tr_lat=ETRS89_lat tr_lon=ETRS89_lon tr_h=ETRS89_h;
+    %end;
+    %else %do;
+      rename tr_lat=WGS84_lat tr_lon=WGS84_lon tr_h=WGS84_h;
+    %end;
+  quit;
+    
+  %* If no height in the input, then also no height in the output;
+  %if &lmv_height_exist eq 0 %then %do;
+    proc sql;
+      alter table &pDSin drop h;
+      alter table &pDSout drop h %if &pDirection eq 1 %then , ETRS89_h; %else , WGS84_h;;
+    quit;  
+  %end;
+  
+  %* Keep only the transformation result. Suppress all others;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %if &pDirection eq 1 %then %do;
+      %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;;
+      %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
+    %end;
+    %else %do;
+       %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon;;
+       %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns WGS84_h;;
+    %end;
+    %put &=lmv_DSin_columns;
+    data &pDSout;
+      set &pDSout;
+      keep &lmv_DSin_columns;
+    run;
+  %end;
+%mend lm_WGS84_to_ETRS89_v3;
+
+%macro WGS84_pseudo_validatation_v3(pLib /* The library where CERTIFY_RDNAP_V3 is stored */);
+  /*
+  This pseudo validation takes dataset CERTIFY_RDNAP_V3 as input. There you have ETRS89 coordinates. They are transformed to WGS84 and then 
+  back to ETRS89. Then compared to CERTIFY_RDNAP_V3. The coordinates should be equal. No version one exists.
+  */
+  %etrs_itrs_ini_v3
+  data tmp_data;
+    set &pLib..CERTIFY_RDNAP_V3 (keep=point_id ETRS89_lat ETRS89_lon ETRS89_h);
+    rename ETRS89_lat=lat ETRS89_lon=lon ETRS89_h=h;
+  run;
+  %ETRS89_to_WGS84_v3(tmp_data, ETRS89_to_WGS84_V3);
+
+  data &pLib..ETRS89_to_WGS84_V3;
+    set ETRS89_to_WGS84_V3 (keep=point_id lat lon h WGS84_lat WGS84_lon WGS84_h);
+    format dlat dlon dh BEST32.;
+    dlat = abs(lat - WGS84_lat);
+    dlon = abs(lon - WGS84_lon);
+    dh = abs(h - WGS84_h);
+    if dlat lt 0.00005 then lat_conv_ok = 1;
+      else lat_conv_ok = 0;
+    if dlon lt 0.00005 then lon_conv_ok = 1;
+      else lon_conv_ok = 0;
+    if lat_conv_ok eq 1 and lon_conv_ok eq 1 then lat_lon_conv_ok = 1;
+      else lat_lon_conv_ok = 0;
+    if WGS84_h eq -999999 then h_conv_ok = 1;
+    else if dh lt 0.05 then h_conv_ok = 1;
+         else h_conv_ok = 0;
+  run;
+
+  proc sql;
+    title1 '10000 points are transformed from ETRS89 to WGS84.';
+    title2 'lat and lon accuracy is 0.00005 degree, h accuracy is 0.05 meters';
+    select max(dlat) as max_dlat, max(dlon) as max_dlon,
+    (select max(dh) from &pLib..ETRS89_to_WGS84_V3 where WGS84_h ne -999999) as max_dh,
+    (select sum(lat_conv_ok) from &pLib..ETRS89_to_WGS84_V3) as dlat,
+    (select sum(lon_conv_ok) from &pLib..ETRS89_to_WGS84_V3) as dlon,
+    (select sum(lat_lon_conv_ok) from &pLib..ETRS89_to_WGS84_V3) as dlatdlon,
+    (select sum(h_conv_ok) from &pLib..ETRS89_to_WGS84_V3) as dh
+    from &pLib..ETRS89_to_WGS84_V3;
+    title;
+  quit;
+ 
+  data tmp_data;
+    set &pLib..ETRS89_to_WGS84_V3 (keep=point_id WGS84_lat WGS84_lon WGS84_h);
+    rename WGS84_lat=lat WGS84_lon=lon WGS84_h=h;
+  run;
+  %WGS84_to_ETRS89_v3(tmp_data, WSG84_to_ETRS89_V3)
+  
+  data &pLib..WSG84_to_ETRS89_V3;
+    set WSG84_to_ETRS89_V3 (keep=point_id lat lon h ETRS89_lat ETRS89_lon ETRS89_h);
+    format dlat dlon dh BEST32.;
+    dlat = abs(lat - ETRS89_lat);
+    dlon = abs(lon - ETRS89_lon);
+    dh = abs(h - ETRS89_h);
+    if dlat lt 0.00005 then lat_conv_ok = 1;
+      else lat_conv_ok = 0;
+    if dlon lt 0.00005 then lon_conv_ok = 1;
+      else lon_conv_ok = 0;
+    if lat_conv_ok eq 1 and lon_conv_ok eq 1 then lat_lon_conv_ok = 1;
+      else lat_lon_conv_ok = 0;
+    if ETRS89_h eq -999999 then h_conv_ok = 1;
+    else if dh lt 0.05 then h_conv_ok = 1;
+         else h_conv_ok = 0;
+  run;
+
+  proc sql;
+    title1 '10000 points are transformed from WGS84 to ETRS89.';
+    title2 'lat and lon accuracy is 0.00005 degree, h accuracy is 0.05 meters';
+    select max(dlat) as max_dlat, max(dlon) as max_dlon,
+    (select max(dh) from &pLib..WSG84_to_ETRS89_V3 where ETRS89_h ne -999999) as max_dh,
+    (select sum(lat_conv_ok) from &pLib..WSG84_to_ETRS89_V3) as dlat,
+    (select sum(lon_conv_ok) from &pLib..WSG84_to_ETRS89_V3) as dlon,
+    (select sum(lat_lon_conv_ok) from &pLib..WSG84_to_ETRS89_V3) as dlatdlon,
+    (select sum(h_conv_ok) from &pLib..WSG84_to_ETRS89_V3) as dh
+    from &pLib..WSG84_to_ETRS89_V3;
+    title;
+  quit;
+
+  proc sql;
+    title1 '10000 points are transformed from ETRS89 to WGS84 and back to ETRS89.';
+    title2 'The starting ETRS89 coordinates are compared with the transformed ETRS89 coordinates.';
+    title3 'The accuracy for the lat and lon is 0.00000000001 and for the h 0.0000001';
+    title4 'You should not get any report output below here. Then all ok.';
+    select round(abs(T1.ETRS89_lat - T2.ETRS89_lat),0.00000000001) as dlat
+          ,round(abs(T1.ETRS89_lon - T2.ETRS89_lon),0.00000000001) as dlon
+          ,round(abs(T1.ETRS89_h - T2.ETRS89_h),0.0000001) as dh
+          ,T1.ETRS89_lat as a, T2.ETRS89_lat as b
+    from  &pLib..CERTIFY_RDNAP_V3 as T1,
+          &pLib..WSG84_to_ETRS89_V3 as T2
+    where T1.point_id = T2.point_id
+      and calculated dlat ne 0
+      and calculated dlon ne 0
+      and calculated dh ne 0;
+    title;
+  quit;
+%mend WGS84_pseudo_validatation_v3;
+
+%*************************************************;
+%* END  : ETRS89 to/from ITRS transformation (v3) ;
+%* BEGIN: Miscellaneous macros                    ;
+%*************************************************;
 
 %macro display_self_validation_results(pLib /* The library were the datasets are stored */);
-  /* No check is done if the datasets exists */
+  %* No check is done if the datasets exists;
   proc sql;
     title1 '10000 pointer are transformed. This is what you should get:';
     title2 '   max_dx    max_dy    max_dz     dx     dy    dxdy   dz';
@@ -3679,7 +4928,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   proc sql;
     title1 '10000 points are transformed. This is what you should get:';
     title2 '   max_dx    max_dy    max_dz     dx     dy    dxdy   dz';
-    title3 ' 0.000338  0.000757  0.000051  10000  10000  10000  10000';
+    title3 ' 0.000338  0.000758 0.000051  10000  10000  10000  10000';
     select max(dx) as max_dx, max(dy) as max_dy, max(dz) as max_dh,
     (select sum(conv_x_ok) from &pLib..SELF_ETRS89_V2) as dx,
     (select sum(conv_y_ok) from &pLib..SELF_ETRS89_V2) as dy,
@@ -3700,6 +4949,33 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     (select sum(lat_lon_conv_ok) from &pLib..SELF_RDNAP_V2) as dlatdlon,
     (select sum(h_conv_ok) from &pLib..SELF_RDNAP_V2) as dh
     from &pLib..SELF_RDNAP_V2;
+    title;
+  quit;
+  
+  proc sql;
+    title1 '10000 points are transformed. This is what you should get:';
+    title2 '   max_dx    max_dy    max_dz     dx     dy    dxdy   dz';
+    title3 ' 0.000338  0.000758 0.000051  10000  10000  10000  10000';
+    select max(dx) as max_dx, max(dy) as max_dy, max(dz) as max_dh,
+    (select sum(conv_x_ok) from &pLib..SELF_ETRS89_V3) as dx,
+    (select sum(conv_y_ok) from &pLib..SELF_ETRS89_V3) as dy,
+    (select sum(conv_x_y_ok) from &pLib..SELF_ETRS89_V3) as dxdy,
+    (select sum(conv_z_ok) from &pLib..SELF_ETRS89_V3) as dz
+    from &pLib..SELF_ETRS89_V3;
+    title;
+  quit;
+  
+  proc sql;
+    title1 '10000 points are transformed. This is what you should get:';
+    title2 'max_dlat  max_dlon   max_dh   dlat  dlon  dlatdlon   dh';
+    title3 '3.534E-8  4.247E-8  0.000051  9774  9857    9761    10000';
+    select max(dlat) as max_dlat, max(dlon) as max_dlon,
+    (select max(dh) from &pLib..SELF_RDNAP_V3 where h_conv_ok eq 1 and ETRS89_h ne -999999) as max_dh,
+    (select sum(lat_conv_ok) from &pLib..SELF_RDNAP_V3) as dlat,
+    (select sum(lon_conv_ok) from &pLib..SELF_RDNAP_V3) as dlon,
+    (select sum(lat_lon_conv_ok) from &pLib..SELF_RDNAP_V3) as dlatdlon,
+    (select sum(h_conv_ok) from &pLib..SELF_RDNAP_V3) as dh
+    from &pLib..SELF_RDNAP_V3;
     title;
   quit;
  %mend display_self_validation_results;
