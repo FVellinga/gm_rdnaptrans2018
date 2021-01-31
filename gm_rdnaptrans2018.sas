@@ -10,14 +10,14 @@ Coordinate transformation to and from Stelsel van de Rijksdriehoeksmeting and No
 This implementation follows the flow as described in the RDNAPTRANS2018 document found at www.nsgi.nl
 All formulas and variables are explained there.
 
-Three different SAS implementations exists:
+Three different SAS implementations (all certified) exists:
 V1  Datasetless solution: Input coordinates are supplied as macro parameters, output is returned as global macro variables.
     Recommended for single transformation. Not suitable for bulk transformations.
 V2  Dataset driven solution: Input dataset contains the coordinates that must be transformed. Output dataset is the input dataset
     enriched with the transformed coordinates. Use this method for bulk transformations.
 v3  An optimization of V2. Array handling is improved.
 - The V1 version needs no data preparation. The V2/V3 version needs data preparation to get working.
-- A one time setup effort is needed to get the correction grids stored in a SAS library.
+- A one time setup effort is needed to get the correction grids stored in a permanent SAS library.
 
 Example version 1:
   %rdnaptrans2018_ini_v1(RDNAP)
@@ -49,7 +49,8 @@ Version:
                 Height value is now an optional column in the input dataset. When not exists, it is automatically set
                 to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method. Also not put in the output.
 1.5 - 20210130: V3 added. This in an optimization of V2. The grid is now stored in a temporary array and no need to
-                initialize first.          
+                initialize first. 
+                (This version is also certified.)
                 
 USAGE EXPLANATION:
 ------------------
