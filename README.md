@@ -1,7 +1,7 @@
 # gm_rdnaptrans2018.sas
 
 <p>Lees als: global macro rdnaptrans 2018 sas</br>
-Het is een suite/verzameling van macros t.b.v. <strong>RD NAP</strong> <-> <strong>ETRS89</strong> <-> <strong>WGS84 datum</strong> transformaties</p>
+Het is een suite/verzameling van macros t.b.v. <strong>RD NAP</strong> <-> <strong>ETRS89</strong> <-> <strong>WGS84 datum</strong> transformaties.</p>
 
 # Inleiding
 
@@ -26,15 +26,14 @@ RD NAP(1) -&gt; ETRS89(2) -&gt; ITRF2008(3) -&gt; WGS84(4)</br>
 <p>Deze code gaat niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
 kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een vorm van schijnnauwkeurigheid creëren.</p>
 
-<p><b>RDNAPTRANS™2018</b> compliant code transformeert elk datum paar naar een ander datum paar, welke plek op
-aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
+<p><b>RDNAPTRANS™2018</b> compliant code transformeert elk datum paar (binnen <strong>RD NAP</strong> en <strong>ETRS89</strong> domein) naar een ander datum paar, welke plek op aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen Deze code geeft die waarschuwing (nog) niet.</p>
 
 <p>Tot zover de inleiding. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
 
 # De Code
 
-<p>De SAS code ondersteunt twee manieren, methoden om te transformeren:</p>
+<p>De SAS code ondersteunt drie manieren, methoden, om te transformeren:</p>
 
 <table border=1 cellspacing=0 cellpadding=0
  style='border-collapse:collapse;border:none'>
@@ -60,7 +59,7 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
   <p>V3</p>
   </td>
   <td>
-   <p><strong>In ontwikkeling: </strong> Geoptimaliseerde versie van V2. Zo wordt er geen gebruik meer gemaakt van macro variabelen om de grid in te lezen. Nog niet beschikbaar in de code. Moet nog één keer testen.</p>
+   <p><strong>Geoptimaliseerde versie van V2. Er wordt geen gebruik meer gemaakt van macro variabelen om de grid in te lezen. Is sneller dan V2.</p>
   </td>
  </tr> 
 </table>
@@ -70,9 +69,9 @@ dataset. Optioneel zijn het zogenaamde zelfvalidatie bestand en de twee certific
 validatie bestanden. Handig, want hiermee toon je aan dat deze code werkt.</p>
 
 <p>Dit, het laden van files en ze opslaan als dataset, zijn eenmalige acties. Sla ze op in
-een pre-assigned library, bij mij heet die <b>RDNAP</b>, en klaar ben je.</p>
+een pre-assigned, permanente, library. Bij mij heet die <b>RDNAP</b>, en klaar ben je.</p>
 
-<p>Gebruik van de macro staat beschreven in de header. Het is geschreven binnen SAS studio.
+<p>Gebruik van de macro staat beschreven in de header. Het is geschreven in SAS studio.
 Ik sla macro’s op in een SAS autocall library. Dus als je <b>gm_rdnaptrans2018.sas</b>
 daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code werken.</p>
 
@@ -88,4 +87,4 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 <i>%self_validation_ETRS89_v2(RDNAP)</br>
 %self_validation_RD_v2(RDNAP)</br>
 %display_self_validation_results(RDNAP)</i></br>
-Dit is de zogenaamde zelf validatie service.</p>
+Dit is de zogenaamde zelfvalidatie service.</p>
