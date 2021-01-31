@@ -15,7 +15,7 @@ V1  Datasetless solution: Input coordinates are supplied as macro parameters, ou
     Recommended for single transformation. Not suitable for bulk transformations.
 V2  Dataset driven solution: Input dataset contains the coordinates that must be transformed. Output dataset is the input dataset
     enriched with the transformed coordinates. Use this method for bulk transformations.
-v3  An optimization of V3. Array handling is improved.
+v3  An optimization of V2. Array handling is improved.
 - The V1 version needs no data preparation. The V2/V3 version needs data preparation to get working.
 - A one time setup effort is needed to get the correction grids stored in a SAS library.
 
@@ -48,7 +48,8 @@ Version:
 1.4 - 20210107: Fred Vellinga, Suppress parameter added. Suppresses all intermediate variables in the output. Default on.
                 Height value is now an optional column in the input dataset. When not exists, it is automatically set
                 to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method. Also not put in the output.
-1.5 - 20210130: V3 added. This in an optimization of V3. The grid is now stored in a temporary array.            
+1.5 - 20210130: V3 added. This in an optimization of V2. The grid is now stored in a temporary array and no need to
+                initialize first.          
                 
 USAGE EXPLANATION:
 ------------------
