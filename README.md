@@ -59,7 +59,7 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
   <p>V3</p>
   </td>
   <td>
-   <p><strong>Geoptimaliseerde versie van V2. Er wordt geen gebruik meer gemaakt van macro variabelen om de grid in te lezen. Is sneller dan V2.</p>
+   <p>Geoptimaliseerde versie van V2. Er wordt geen gebruik meer gemaakt van macro variabelen om de grid in te lezen. Is sneller dan V2.</p>
   </td>
  </tr> 
 </table>
