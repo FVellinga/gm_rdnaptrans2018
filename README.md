@@ -8,13 +8,13 @@ Het is een suite/verzameling van macros t.b.v. <strong>RD NAP</strong> <-> <stro
 <p>De SAS macro <b>gm_rdnaptrans2018.sas</b> is een SAS implementatie die de geografische Nederlandse <b>RD NAP</b> (<b>R</b>ijks<b>D</b>riehoeksmeting en <b>N</b>ormaal
 <b>A</b>msterdam <b>P</b>eil) coördinaten omzet, transformeert, naar <b>ETRS89</b> (<b>E</b>uropean <b>T</b>errestrial <b>R</b>eference
 <b>S</b>ystem 1989), of andersom. De code is gecertificeerd en mag het handelsmerk <b>RDNAPTRANS™2018</b> voeren. Dit betekent dat deze
-transformaties correct zijn als er juist gebruik wordt gemaakt van <b>gm_rdnaptrans2018.sas</b>. <b>RD NAP</b> dimensie is in meters, <b>ETRS89</b> is in graden
+transformaties correct zijn als er juist gebruik wordt gemaakt van <b>gm_rdnaptrans2018.sas</b>. <b>RD NAP</b> eenheid is in meters, <b>ETRS89</b> is in graden
 en meters (de hoogte).</p>
 
 <p>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
  <b>ITRS</b> (<b>I</b>nternational <b>T</b>errestrial <b>R</b>eference
 <b>S</b>ystem) om <b>WGS84</b> (<b>W</b>orld <b>G</b>eodetic <b>S</b>ystem
-89) coördinaten te <i>benaderen</i>. <b>WGS89</b> dimensie is in graden en meters (de
+89) coördinaten te <i>benaderen</i>. <b>WGS89</b> eenheid is in graden en meters (de
 hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transformatie
 en is <b><i>niet</i></b> onderdeel van het handelsmerk <b>RDNAPTRANS™2018</b>.</p>
 
