@@ -88,4 +88,4 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 %self_validation_RD_v2(RDNAP)</br>
 %display_self_validation_results(RDNAP)</i></br>
 Dit is de zogenaamde zelfvalidatie service.</p>
-<p><strong></u>Noot:</u></strong>De zelfvalidatiebestanden, de punten die er in staan, zijn aan verandering onderhevig. Beter is misschien om ze van de <strong>NSGI</strong> website zelf te halen. Dan heb je altijd de laatste versie. </p>
+<p><strong><u>Noot:</u></strong> De zelfvalidatiebestanden, de punten die er in staan, zijn aan verandering onderhevig. Beter is misschien om ze van de <strong>NSGI</strong> website zelf te halen. Dan heb je altijd de laatste versie. </p>
