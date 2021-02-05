@@ -29,6 +29,7 @@ kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een vorm
 <p><b>RDNAPTRANS™2018</b> compliant code transformeert elk punt (binnen <strong>RD NAP</strong> en <strong>ETRS89</strong> domein), welke plek op aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen Deze code geeft die waarschuwing (nog) niet.</p>
 
+<p><strong><u>Noot:</u></strong> De twee validatiebestanden nodig voor de zelfservice certificering zijn aan verandering onderhevig. De punten die er in staan veranderen. Beter is om ze van de <strong>NSGI</strong> website zelf te halen. Dan heb je altijd de laatste versie. Voor de werking van het programma heb je ze niet nodig.</p>
 <p>Tot zover de inleiding. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
 
 # De Code
@@ -88,4 +89,4 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 %self_validation_RD_v2(RDNAP)</br>
 %display_self_validation_results(RDNAP)</i></br>
 Dit is de zogenaamde zelfvalidatie service.</p>
-<p><strong><u>Noot:</u></strong> De zelfvalidatiebestanden, de punten die er in staan, zijn aan verandering onderhevig. Beter is misschien om ze van de <strong>NSGI</strong> website zelf te halen. Dan heb je altijd de laatste versie. </p>
+
