@@ -14,7 +14,7 @@ en meters (de hoogte).</p>
 <p>Tevens kan de macro transformaties aan van <b>ETRS89</b> naar
  <b>ITRS</b> (<b>I</b>nternational <b>T</b>errestrial <b>R</b>eference
 <b>S</b>ystem) om <b>WGS84</b> (<b>W</b>orld <b>G</b>eodetic <b>S</b>ystem
-89) coördinaten te <i>benaderen</i>. <b>WGS89</b> eenheid is in graden en meters (de
+89) coördinaten te <i>benaderen</i>. <b>WGS84</b> eenheid is in graden en meters (de
 hoogte). Dit gedeelte staat los van de <b>RD NAP</b> naar <b>ETRS89</b> transformatie
 en is <b><i>niet</i></b> onderdeel van het handelsmerk <b>RDNAPTRANS™2018</b>.</p>
 
