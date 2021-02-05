@@ -22,11 +22,11 @@ en is <b><i>niet</i></b> onderdeel van het handelsmerk <b>RDNAPTRANS™2018</b>.
 </br>Er is maar één manier om van <b>RD NAP</b> naar <b>WGS84</b> (en terug) te komen: </br>
 
 RD NAP(1) -&gt; ETRS89(2) -&gt; ITRF2008(3) -&gt; WGS84(4)</br>
-(ITFR2008 is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</p>
+(ITRF2008 is een realisatie van ITRS. Je mag ook ITRF2014 gebruiken.)</p>
 <p>Deze code gaat niet verder dan stap 3, met de aantekening, dat als je wilt projecteren op een
 kaart, het stap 2 resultaat misschien wel voldoende is. Stap 3 en 4 kan een vorm van schijnnauwkeurigheid creëren.</p>
 
-<p><b>RDNAPTRANS™2018</b> compliant code transformeert elk datum paar (binnen <strong>RD NAP</strong> en <strong>ETRS89</strong> domein) naar een ander datum paar, welke plek op aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
+<p><b>RDNAPTRANS™2018</b> compliant code transformeert elk punt (binnen <strong>RD NAP</strong> en <strong>ETRS89</strong> domein), welke plek op aarde dan ook. Maar buiten de zogenaamde grids kan de afwijking groot zijn en klopt er niets meer van. Dat is volkomen correct gedrag. Sommige implementaties geven
 dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen Deze code geeft die waarschuwing (nog) niet.</p>
 
 <p>Tot zover de inleiding. Het is ook allemaal te vinden op <a href="http://www.nsgi.nl">www.nsgi.nl</a>.</p>
@@ -65,8 +65,8 @@ dan een waarschuwing dat je transformeert met waarden die buiten de grid liggen 
 </table>
 
 <p>Er moeten twee grid files (tekst bestanden) worden ingeladen en opgeslagen worden als
-dataset. Optioneel zijn het zogenaamde zelfvalidatie bestand en de twee certificatie
-validatie bestanden. Handig, want hiermee toon je aan dat deze code werkt.</p>
+dataset. Optioneel zijn het zogenaamde zelfvalidatiebestand en de twee certificatie
+validatiebestanden. Handig, want hiermee toon je aan dat deze code werkt.</p>
 
 <p>Dit, het laden van files en ze opslaan als dataset, zijn eenmalige acties. Sla ze op in
 een pre-assigned, permanente, library. Bij mij heet die <b>RDNAP</b>, en klaar ben je.</p>
