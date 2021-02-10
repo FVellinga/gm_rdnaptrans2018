@@ -15,11 +15,12 @@ V1  Datasetless solution: Input coordinates are supplied as macro parameters, ou
     Recommended for single transformation. Not suitable for bulk transformations.
 V2  Dataset driven solution: Input dataset contains the coordinates that must be transformed. Output dataset is the input dataset
     enriched with the transformed coordinates. Use this method for bulk transformations.
-v3  An optimization of V2. Array handling is improved.
+V3  An optimization of V2. Array handling is improved.
 - The V1 version needs no data preparation. The V2/V3 version needs data preparation to get working.
 - A one time setup effort is needed to get the correction grids stored in a permanent SAS library.
 
 Example version 1:
+  %gm_rdnaptrans2018
   %rdnaptrans2018_ini_v1(RDNAP)
   %ETRS89_to_RD_v1("52 9 22.178","5 23 15.500",pH=72.6882,pType=dgr)
   %ETRS89_to_RD_v1(53.199392335,6.05939747) %* 199920.0426 - 579403.4233;
@@ -27,19 +28,19 @@ Example version 1:
   %rdnaptrans2018_output_v1
   
 Example version 2:
+  %gm_rdnaptrans2018
   %rdnaptrans2018_ini_v2
   %rdnaptrans2018_grid_v2(RDcorrectionDataset, HeightCorrectionDataSet)
   %ETRS89_to_RD_v2(DataSetIn, DataSetOut)
   
 Example version 3:
+  %gm_rdnaptrans2018
   %rdnaptrans2018_ini_v3
-  %ETRS89_to_RD_v2(DataSetIn, DataSetOut, LibGrid)  
-  
+  %ETRS89_to_RD_v3(DataSetIn, DataSetOut, LibGrid)  
+
 Version:
-1.0 - 20191008: Fred Vellinga, Initial version. V1 version.
-                (This version is certified.)
-1.1 - 20191019: Fred Vellinga, version 2 solution added.
-                (This version is also certified.)
+1.0 - 20191008: Fred Vellinga, Initial version. V1 version. (This version is certified.)
+1.1 - 20191019: Fred Vellinga, version 2 solution added. (This version is also certified.)
 1.2 - 20191027: Fred Vellinga, ETRS to ITRS transformation added. ITRF2008/ITRF2014 can regarded as equal to WGS84.
                 ITRF2008≈WGS84-G1762. Please note this has nothing to do with the RDNAPTRANS™2018 trademark.
                 That trademark only applies to the RD to ETRS89 (both ways) transformation.
@@ -48,9 +49,9 @@ Version:
 1.4 - 20210107: Fred Vellinga, Suppress parameter added. Suppresses all intermediate variables in the output. Default on.
                 Height value is now an optional column in the input dataset. When not exists, it is automatically set
                 to -999999 (ETRS89<->RD) or 0 (ETRS89<->WGS84). Applies only to the V2 method. Also not put in the output.
-1.5 - 20210130: V3 added. This in an optimization of V2. The grid is now stored in a temporary array and no need to
-                initialize first. 
-                (This version is also certified.)
+1.5 - 20210130: V3 added. This in an optimization of V2. The grid is now stored in a temporary array. 
+                No need to run the grid initialization macro first. (This version is also certified.)
+1.6 - 20210210: Supressing intermediate variables bug solved in case DatasetIn is equal to DataSetOut.
                 
 USAGE EXPLANATION:
 ------------------
@@ -1635,7 +1636,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   /*
   Convert ETRS89 lat lon h coordinate pair to RD NAP x y H coordinate pair. Variables are re-used. So the content of 
   the output dataset reflects the end status of a row. Any intermediate variable results are not stored. 
-  The input variable are mandatory. When no height conversion is needed, then set h to -999999.
+  The input variables are mandatory. When no height conversion is needed, then set h to -999999.
    Input | Output
   -------+--------
     lat  |  RD_x
@@ -1643,9 +1644,9 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       h  |  RD_H 
   A lot of columns (more than 100) are added to the output dataset. But they can be suppresed.
   */
-  
-  %* Add the height column, if not specified;
-  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+ 
+   %* Split parameter pDSin into a libname and table name;
+   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
   %end; 
@@ -1653,17 +1654,30 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_lib = WORK;
     %let lmv_ds = &pDSin;
   %end;
+ 
+  %* If requested, suppress all intermediate columns in the output;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the RD transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y;
+  %end;
+  
+  %* Add the height column, if not specified;
   proc sql noprint;
     select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
   quit;
+  %put &=lmv_height_exist;
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
       update &pDSin set h = -999999;
     quit;  
   %end;
-
+  
   data &pDSout;
     set &pDSin;
     format phi labda h BEST32.;
@@ -1960,25 +1974,19 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin drop h;
-      alter table &pDSout drop h, RD_H;
-    quit;  
+      alter table &pDSout drop RD_H;
+      %if &pDSin ne &pDSout %then alter table &pDSout drop h;;    %* In case of same names then h is dropped as part of &pDSin;
   %end;
   
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
-    %* Get the columns from the input dataset and then add the RD transformation values to it;
-    proc sql noprint;
-      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
-      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
-    quit;
-    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y;
     %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns RD_H;;
     %put &=lmv_DSin_columns;
     data &pDSout;
       set &pDSout;
       keep &lmv_DSin_columns;
     run;
-  %end;
+   %end;
 %mend ETRS89_to_RD_v2;
 
 %macro RD_to_ETRS89_v2(pDSin        /* The dataset that contains x, y and z that must be transformed to ETRS89 */
@@ -1993,10 +2001,9 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      x   | ETRS89_lat
      y   | ETRS89_lon
      H   | ETRS89_h
-  A lot of columns (more than 100) are added to the output dataset. But they can be suppressed
+  A lot of columns (more than 100) are added to the output dataset. But they can be suppressed.
   */
- 
-  %* Add the height column, if not specified;
+  %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
@@ -2005,6 +2012,18 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_lib = WORK;
     %let lmv_ds = &pDSin;
   %end;
+  
+  %* If requested, suppress all intermediate columns in the output;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;
+  %end;
+  
+  %* Add the height column, if not specified;
   proc sql noprint;
     select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
@@ -2285,18 +2304,13 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin drop H;
-      alter table &pDSout drop H, ETRS89_h;
+      alter table &pDSout drop ETRS89_h;
+      %if &pDSin ne &pDSout %then alter table &pDSout drop H;;    %* In case of same names then h is dropped as part of &pDSin;
     quit;  
   %end;
-  
+
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
-    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
-    proc sql noprint;
-      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
-      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
-    quit;
-    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;
     %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
     %put &=lmv_DSin_columns;
     data &pDSout;
@@ -2331,7 +2345,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   A lot of columns (more than 100) are added to the output dataset. But they can be suppresed.
   */
   
-  %* Add the height column, if not specified;
+  %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
@@ -2340,10 +2354,23 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_lib = WORK;
     %let lmv_ds = &pDSin;
   %end;
+  
+  %* If requested, suppress all intermediate columns in the output;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the RD transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y;
+  %end;
+  
+  %* Add the height column, if not specified;
   proc sql noprint;
     select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
   quit;
+  %put &=lmv_height_exist;
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin add h num format=BEST32.;        %* SAS does not support a default option;
@@ -2665,18 +2692,13 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin drop h;
-      alter table &pDSout drop h, RD_H;
+      alter table &pDSout drop RD_H;
+      %if &pDSin ne &pDSout %then alter table &pDSout drop h;;      %* In case of same names then h is dropped as part of &pDSin;
     quit;  
   %end;
-  
+
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
-    %* Get the columns from the input dataset and then add the RD transformation values to it;
-    proc sql noprint;
-      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
-      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
-    quit;
-    %let lmv_DSin_columns = &lmv_DSin_columns RD_x RD_y;
     %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns RD_H;;
     %put &=lmv_DSin_columns;
     data &pDSout;
@@ -2699,10 +2721,9 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      x   | ETRS89_lat
      y   | ETRS89_lon
      H   | ETRS89_h
-  A lot of columns (more than 100) are added to the output dataset. But they can be suppressed
+  A lot of columns (more than 100) are added to the output dataset. But they can be suppressed.
   */
- 
-  %* Add the height column, if not specified;
+  %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
@@ -2711,10 +2732,23 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_lib = WORK;
     %let lmv_ds = &pDSin;
   %end;
+
+  %* If requested, suppress all intermediate columns in the output;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;
+  %end;  
+
+  %* Add the height column, if not specified;
   proc sql noprint;
     select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
   quit;
+  %put &=lmv_height_exist;
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin add H num format=BEST32.;        %* SAS does not support a default option;
@@ -3007,18 +3041,14 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin drop H;
-      alter table &pDSout drop H, ETRS89_h;
+      alter table &pDSout drop ETRS89_h;
+      %if &pDSin ne &pDSout %then alter table &pDSout drop H;;      %* In case of same names then H is dropped as part of &pDSin;
     quit;  
   %end;
-  
+
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
     %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
-    proc sql noprint;
-      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
-      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
-    quit;
-    %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;
     %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
     %put &=lmv_DSin_columns;
     data &pDSout;
