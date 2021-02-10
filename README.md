@@ -80,27 +80,27 @@ daar eenmaal plaatst, je de paden goed heb staan, dan moet onderstaande code wer
 %gm_rdnaptrans2018</br>
 %grid_import_rdcorr2018(/folders/myfolders/sasuser.v94/files/input/rdcorr2018.txt, RDNAP)</br>
 %grid_import_nlgeo2018(/folders/myfolders/sasuser.v94/files/input/nlgeo2018.txt, RDNAP)</br>
-%self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</br>
+%self_validation_import(/folders/myfolders/sasuser.v94/files/input/Z001_ETRS89andRDNAP.txt, RDNAP)</i>
 </p>
 
 <p>Voorbeeld versie 1:</br>
-  %gm_rdnaptrans2018</br>
+  <i>%gm_rdnaptrans2018</br>
   %rdnaptrans2018_ini_v1(RDNAP)</br>
   %ETRS89_to_RD_v1("52 9 22.178","5 23 15.500",pH=72.6882,pType=dgr)</br>
   %ETRS89_to_RD_v1(53.199392335,6.05939747) %* 199920.0426 - 579403.4233;</br>
   %RD_to_ETRS89_v1(199920.0426,579403.4233) %* 53.199392335 - 6.05939747;</br>
-  %rdnaptrans2018_output_v1</p>
+  %rdnaptrans2018_output_v1</i></p>
   
 <p>Voorbeeld versie 2:</br>
-  %gm_rdnaptrans2018</br>
+  <i>%gm_rdnaptrans2018</br>
   %rdnaptrans2018_ini_v2</br>
   %rdnaptrans2018_grid_v2(RDcorrectionDataset, HeightCorrectionDataSet)</br>
-  %ETRS89_to_RD_v2(DataSetIn, DataSetOut)</p>
+  %ETRS89_to_RD_v2(DataSetIn, DataSetOut)</i></p>
   
 <p>Voorbeeld versie 3:</br>
-  %gm_rdnaptrans2018</br>
+  <i>%gm_rdnaptrans2018</br>
   %rdnaptrans2018_ini_v3</br>
-  %ETRS89_to_RD_v3(DataSetIn, DataSetOut, RDNAP)</p> 
+  %ETRS89_to_RD_v3(DataSetIn, DataSetOut, RDNAP)</i></p> 
 
 
 <p>Je kan ook dit doen, om te verifiëren dat de transformaties werken:</br>
