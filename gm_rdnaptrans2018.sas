@@ -4275,7 +4275,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   A height value is mandatory. Set to zero when there is no height.
   */
  
-  %* Add the height column, if not specified;
+  %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
@@ -4284,6 +4284,23 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_lib = WORK;
     %let lmv_ds = &pDSin;
   %end;
+  
+  %* If requested, suppress all intermediate columns in the output;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %if &pDirection eq 1 %then %do;
+      %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;;
+    %end;
+    %else %do;
+      %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon;;
+    %end;
+  %end;
+  
+  %* Add the height column, if not specified;
   proc sql noprint;
     select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
@@ -4294,7 +4311,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       update &pDSin set h = 0;
     quit;  
   %end;
- 
+   
   data &pDSout;
     set &pDSin;
     format a_grs80 f_grs80 e_square_grs80 epsilon BEST32.;
@@ -4445,24 +4462,18 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin drop h;
-      alter table &pDSout drop h %if &pDirection eq 1 %then , ETRS89_h; %else , WGS84_h;;
+      alter table &pDSout drop %if &pDirection eq 1 %then ETRS89_h; %else WGS84_h;;
+      %if &pDSin ne &pDsout %then alter table &pDSout drop h;;
     quit;  
   %end;
   
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
-    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
-    proc sql noprint;
-      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
-      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
-    quit;
     %if &pDirection eq 1 %then %do;
-      %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;;
       %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
     %end;
     %else %do;
-       %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon;;
-       %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns WGS84_h;;
+      %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns WGS84_h;;
     %end;
     %put &=lmv_DSin_columns;
     data &pDSout;
@@ -4603,8 +4614,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      h  | ETRS89_h       WGS84_h
   A height value is mandatory. Set to zero when there is no height.
   */
- 
-  %* Add the height column, if not specified;
+  %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
@@ -4613,6 +4623,23 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     %let lmv_lib = WORK;
     %let lmv_ds = &pDSin;
   %end;
+ 
+  %* If requested, suppress all intermediate columns in the output;
+  %if &pSuppress eq 1 %then %do;
+    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
+    proc sql noprint;
+      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
+      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
+    quit;
+    %if &pDirection eq 1 %then %do;
+      %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;;
+    %end;
+    %else %do;
+     %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon;;
+    %end;
+  %end;
+  
+  %* Add the height column, if not specified;
   proc sql noprint;
     select count(*) into :lmv_height_exist from DICTIONARY.columns
     where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds") and upcase(name) eq 'H';
@@ -4623,7 +4650,7 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       update &pDSin set h = 0;
     quit;  
   %end;
- 
+  
   data &pDSout (drop=itrs_alpha itrs_beta itrs_gamma itrs_delta itrs_tX itrs_tY itrs_tZ rate_alpha rate_beta rate_gamma rate_delta rate_tX rate_tY rate_tZ itrs_ref_epoch);
     retain GRS80_a GRS80_f itrs_alpha itrs_beta itrs_gamma itrs_delta itrs_tX itrs_tY itrs_tZ rate_alpha rate_beta rate_gamma rate_delta rate_tX rate_tY rate_tZ itrs_ref_epoch epsilon_itrs_threshold;
     format GRS80_a GRS80_f itrs_alpha itrs_beta itrs_gamma itrs_delta itrs_tX itrs_tY itrs_tZ rate_alpha rate_beta rate_gamma rate_delta rate_tX rate_tY rate_tZ itrs_ref_epoch epsilon_itrs_threshold BEST32.;    
@@ -4799,33 +4826,27 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   %if &lmv_height_exist eq 0 %then %do;
     proc sql;
       alter table &pDSin drop h;
-      alter table &pDSout drop h %if &pDirection eq 1 %then , ETRS89_h; %else , WGS84_h;;
+      alter table &pDSout drop %if &pDirection eq 1 %then ETRS89_h; %else WGS84_h;;
+      %if &pDSin ne &pDSout %then alter table &pDSout drop h;;
     quit;  
   %end;
   
   %* Keep only the transformation result. Suppress all others;
   %if &pSuppress eq 1 %then %do;
-    %* Get the columns from the input dataset and then add the ETRS89 transformation values to it;
-    proc sql noprint;
-      select name into :lmv_DSin_columns separated by ' ' from DICTIONARY.columns
-      where libname eq %upcase("&lmv_lib") and memname eq %upcase("&lmv_ds");
-    quit;
     %if &pDirection eq 1 %then %do;
-      %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_lat ETRS89_lon;;
       %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns ETRS89_h;;
     %end;
     %else %do;
-       %let lmv_DSin_columns = &lmv_DSin_columns WGS84_lat WGS84_lon;;
-       %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns WGS84_h;;
+      %if &lmv_height_exist eq 1 %then %let lmv_DSin_columns = &lmv_DSin_columns WGS84_h;;
     %end;
-    %put &=lmv_DSin_columns;
+    %put &=lmv_DSin_columns;  
     data &pDSout;
       set &pDSout;
       keep &lmv_DSin_columns;
     run;
   %end;
 %mend lm_WGS84_to_ETRS89_v3;
-
+  
 %macro WGS84_pseudo_validatation_v3(pLib /* The library where CERTIFY_RDNAP_V3 is stored */);
   /*
   This pseudo validation takes dataset CERTIFY_RDNAP_V3 as input. There you have ETRS89 coordinates. They are transformed to WGS84 and then 
