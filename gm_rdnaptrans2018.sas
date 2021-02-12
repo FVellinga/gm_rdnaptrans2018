@@ -52,6 +52,7 @@ Version:
 1.5 - 20210130: V3 added. This in an optimization of V2. The grid is now stored in a temporary array. 
                 No need to run the grid initialization macro first. (This version is also certified.)
 1.6 - 20210210: Supressing intermediate variables bug solved in case DatasetIn is equal to DataSetOut.
+1.7 - 20210212: Some local macro variables were not defined as local.
                 
 USAGE EXPLANATION:
 ------------------
@@ -1594,7 +1595,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   - rdcorr2018_lon_corr_[1-144781]
   - nlgeo2018_nap_height_[1-144781]
   */
- 
+  %local lmv_options_session lmv_options_off;
+  
   %* Temporarily turn off any logging. Any current settings may give problems. For me it crashed at EG 7.1;
   proc sql noprint;
     select setting, cats('NO',optname) as options_off 
@@ -1644,9 +1646,10 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       h  |  RD_H 
   A lot of columns (more than 100) are added to the output dataset. But they can be suppresed.
   */
- 
-   %* Split parameter pDSin into a libname and table name;
-   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
+  %local lmv_ds lmv_lib lmv_DSin_columns lmv_height_exist;
+  
+  %* Split parameter pDSin into a libname and table name;
+  %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
     %let lmv_ds = %scan(&pDSin,2,'.');
   %end; 
@@ -2003,6 +2006,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      H   | ETRS89_h
   A lot of columns (more than 100) are added to the output dataset. But they can be suppressed.
   */
+  %local lmv_lib lmv_ds lmv_DSin_columns lmv_height_exist;
+  
   %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
@@ -2344,6 +2349,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
       h  |  RD_H 
   A lot of columns (more than 100) are added to the output dataset. But they can be suppresed.
   */
+  
+  %local lmv_ds lmv_lib lmv_DSin_columns lmv_height_exist;
   
   %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
@@ -2723,6 +2730,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      H   | ETRS89_h
   A lot of columns (more than 100) are added to the output dataset. But they can be suppressed.
   */
+  %local lmv_ds lmv_lib lmv_DSin_columns lmv_height_exist;
+   
   %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
@@ -3180,7 +3189,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
    max_dx    max_dy    max_dz     dx     dy    dxdy   dz
   0.000338  0.000757  0.000051  10000  10000  10000  10000
   */
- 
+  %local lmv_options_session lmv_options_off;
+  
   %* Temporarily turn off any logging, for speeding;
   proc sql noprint;
     select setting, cats('NO',optname) as options_off 
@@ -3263,7 +3273,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   max_dlat  max_dlon   max_dh   dlat  dlon  dlatdlon   dh
   3.534E-8  4.247E-8  0.000051  9774  9857    9761    10000
   */
-
+  %local lmv_options_session lmv_options_off;
+  
   %* Temporarily turn off any logging, for speeding;
   proc sql noprint;
     select setting, cats('NO',optname) as options_off 
@@ -3549,15 +3560,20 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   The return dataset is called         : CERTIFY_ETRS89_V1
   The output file must then be fed into the certification validation service.
   */
- 
-  %* Set notes option to nonotes, if applicable;
+  %local lmv_options_session lmv_options_off;
+   
+  %* Temporarily turn off any logging, for speeding;
   proc sql noprint;
-    select setting into: lmv_option_setting from DICTIONARY.options
-    where optname = 'NOTES';
+    select setting, cats('NO',optname) as options_off 
+           into :lmv_options_session separated by ' '
+               ,:lmv_options_off separated by ' '
+    from DICTIONARY.options
+    where group in ('MACRO', 'LOGCONTROL') 
+     and opttype eq 'Boolean'
+     and optstart eq 'anytime'
+     and optname ne 'MACRO';
   quit;
-  %if &lmv_option_setting eq NOTES %then %do;
-    options nonotes;
-  %end;
+  options &lmv_options_off;  %* turn off all logging;
   
   %rdnaptrans2018_ini_v1(&pLib)
   proc sql noprint;
@@ -3585,10 +3601,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     quit;
   %end;
   
-  %* Restore original notes option setting;  
-  %if &lmv_option_setting eq NOTES %then %do;
-    options notes;
-  %end;
+  %* Restore the session options setting;
+  options &lmv_options_session;
   
   data &pLib..CERTIFY_ETRS89_V1;
     set CERTIFY_ETRS89_V1 (drop=i latitude longitude height);
@@ -3615,15 +3629,20 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
   The return dataset is called         : CERTIFY_RDNAP_V1
   The output file must then be fed into the certification validation service.
   */
- 
-  %* Set notes option to nonotes, if applicable;
+  %local lmv_options_session lmv_options_off;
+  
+  %* Temporarily turn off any logging, for speeding;
   proc sql noprint;
-    select setting into: lmv_option_setting from DICTIONARY.options
-    where optname = 'NOTES';
+    select setting, cats('NO',optname) as options_off 
+           into :lmv_options_session separated by ' '
+               ,:lmv_options_off separated by ' '
+    from DICTIONARY.options
+    where group in ('MACRO', 'LOGCONTROL') 
+     and opttype eq 'Boolean'
+     and optstart eq 'anytime'
+     and optname ne 'MACRO';
   quit;
-  %if &lmv_option_setting eq NOTES %then %do;
-    options nonotes;
-  %end;
+  options &lmv_options_off;  %* turn off all logging;
   
   %rdnaptrans2018_ini_v1(&pLib)
   proc sql noprint;
@@ -3651,10 +3670,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
     quit;
   %end;
   
-  %* Restore original notes option setting;  
-  %if &lmv_option_setting eq NOTES %then %do;
-    options notes;
-  %end;
+  %* Restore the session options setting;
+  options &lmv_options_session;
   
   data &pLib..CERTIFY_RDNAP_V1;
     set CERTIFY_RDNAP_V1 (drop=i x_coordinate y_coordinate height);
@@ -4274,7 +4291,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      h  | ETRS89_h       WGS84_h
   A height value is mandatory. Set to zero when there is no height.
   */
- 
+  %local lmv_ds lmv_lib lmv_DSin_columns lmv_lib_out lmv_ds_out;
+  
   %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
@@ -4614,6 +4632,8 @@ RDNAPTRANS Architecture. The libname is RDNAP. Regular users should have read-ac
      h  | ETRS89_h       WGS84_h
   A height value is mandatory. Set to zero when there is no height.
   */
+  %local lmv_ds lmv_lib lmv_DSin_columns lmv_height_exist lmv_lib_out lmv_ds_out;
+  
   %* Split parameter pDSin into a libname and table name;
   %if %sysfunc(findc(&pDSin,'.')) ne 0 %then %do;
     %let lmv_lib = %scan(&pDSin,1,'.');
